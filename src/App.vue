@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import AppHeader from './components/layout/AppHeader.vue';
 import MarkdownEditor from './components/editor/MarkdownEditor.vue';
 import WeChatPreview from './components/preview/WeChatPreview.vue';
+import NotificationToast from './components/ui/NotificationToast.vue';
 
 const previewRef = ref<InstanceType<typeof WeChatPreview> | null>(null);
 
@@ -24,6 +25,7 @@ const handleCopy = () => {
         <WeChatPreview ref="previewRef" />
       </div>
     </main>
+    <NotificationToast />
   </div>
 </template>
 

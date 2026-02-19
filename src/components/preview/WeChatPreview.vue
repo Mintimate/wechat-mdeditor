@@ -2,6 +2,7 @@
 import { watch, onMounted } from 'vue';
 import { useEditorState } from '../../composables/useEditorState';
 import { useMarkdownRenderer } from '../../composables/useMarkdownRenderer';
+import { useNotification } from '../../composables/useNotification';
 
 const { 
   input, 
@@ -15,6 +16,7 @@ const {
 } = useEditorState();
 
 const { outputHtml, previewContainer, render } = useMarkdownRenderer();
+const { success, error } = useNotification();
 
 // Watch for changes and re-render
 watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, headingStyle, imageCaptionMode], () => {
@@ -54,7 +56,7 @@ const copyToClipboard = async () => {
     });
     
     await navigator.clipboard.write([clipboardItem]);
-    alert('已复制到剪贴板！请直接在微信公众号编辑器中粘贴 (Ctrl+V)');
+    success('已复制到剪贴板！请直接在微信公众号编辑器中粘贴');
   } catch (err) {
     console.error('复制失败', err);
     // 降级方案：使用 execCommand
@@ -70,10 +72,10 @@ const copyToClipboard = async () => {
         document.execCommand('copy');
         selection.removeAllRanges();
         
-        alert('已复制到剪贴板！请直接在微信公众号编辑器中粘贴 (Ctrl+V)');
+        success('已复制到剪贴板！请直接在微信公众号编辑器中粘贴');
       }
     } catch (e) {
-      alert('复制失败，请尝试手动全选复制');
+      error('复制失败，请尝试手动全选复制');
     }
   }
 };
