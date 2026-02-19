@@ -1,0 +1,12 @@
+$:
+  # vscode 事件：专供页面中启动远程开发用
+  vscode:
+    - docker:
+        build: .ide/Dockerfile
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: 安装相关依赖
+          script: 
+            - yarn
