@@ -43,22 +43,38 @@ const copyToClipboard = async () => {
   if (!previewContainer.value) return;
   
   try {
-    const range = document.createRange();
-    range.selectNode(previewContainer.value);
+    // 获取渲染后的 HTML 内容
+    const htmlContent = outputHtml.value;
     
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      document.execCommand('copy');
-      selection.removeAllRanges();
-      
-      alert('已复制到剪贴板！请直接在微信公众号编辑器中粘贴 (Ctrl+V)');
-    }
+    // 使用 Clipboard API 写入 HTML 格式
+    // 微信公众号需要 HTML 格式，而不是纯文本
+    const clipboardItem = new ClipboardItem({
+      'text/html': new Blob([htmlContent], { type: 'text/html' }),
+      'text/plain': new Blob([htmlContent], { type: 'text/plain' })
+    });
+    
+    await navigator.clipboard.write([clipboardItem]);
+    alert('已复制到剪贴板！请直接在微信公众号编辑器中粘贴 (Ctrl+V)');
   } catch (err) {
     console.error('复制失败', err);
-    alert('复制失败，请尝试手动全选复制');
+    // 降级方案：使用 execCommand
+    try {
+      const range = document.createRange();
+      range.selectNode(previewContainer.value);
+      
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        document.execCommand('copy');
+        selection.removeAllRanges();
+        
+        alert('已复制到剪贴板！请直接在微信公众号编辑器中粘贴 (Ctrl+V)');
+      }
+    } catch (e) {
+      alert('复制失败，请尝试手动全选复制');
+    }
   }
 };
 

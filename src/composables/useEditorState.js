@@ -78,12 +78,11 @@ export function useEditorState() {
     `
 
     const listStyle = `
-      ul { margin: 10px 0; padding-left: 2em; list-style-type: disc; list-style-position: outside; }
-      ol { margin: 10px 0; padding-left: 2em; list-style-type: decimal; list-style-position: outside; }
-      li { font-family: ${font}; font-size: ${size}px; color: #3f3f3f; line-height: 1.75; margin: 4px 0; word-break: break-word; overflow-wrap: break-word; display: list-item; }
-      li p, li section, li article, li div, li aside, li header, li footer { display: inline; margin: 0; padding: 0; }
-      li span, li strong, li em, li code { display: inline; margin: 0; padding: 0; }
-      ul ul, ol ol, ul ol, ol ul { margin: 2px 0; padding-left: 1.5em; }
+      ul { margin: 0; padding: 0 0 0 21px; list-style: none; }
+      ol { margin: 0; padding: 0 0 0 21px; list-style: none; }
+      li { font-family: ${font}; font-size: ${size}px; color: #3f3f3f; line-height: 1.75; margin: 7px 8px; display: block; }
+      li p { display: inline; margin: 0; padding: 0; }
+      ul ul, ol ol, ul ol, ol ul { margin: 0; padding-left: 21px; }
     `
 
     let codeStyle = ''
@@ -128,7 +127,7 @@ export function useEditorState() {
     h1 { font-family: ${font}; font-size: ${Math.round(size * 1.5)}px; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #333; border-bottom: 2px solid ${theme.primary}; padding-bottom: 5px; }
     h2 { font-family: ${font}; font-size: ${Math.round(size * 1.25)}px; font-weight: bold; margin-top: 18px; margin-bottom: 10px; color: #333; border-left: 4px solid ${theme.primary}; padding-left: 10px; }
     h3 { font-family: ${font}; font-size: ${Math.round(size * 1.125)}px; font-weight: bold; margin-top: 16px; margin-bottom: 10px; color: #333; }
-    p { font-family: ${font}; font-size: ${size}px; line-height: 1.6; margin-bottom: 15px; color: #3f3f3f; text-align: justify; }
+    p { font-family: ${font}; font-size: ${size}px; line-height: 1.75; margin: 1.5em 8px; color: #3f3f3f; letter-spacing: 0.1em; }
     ${listStyle}
     blockquote { font-family: ${font}; border-left: 4px solid #ddd; padding-left: 15px; color: #666; font-size: ${size - 1}px; margin: 0 0 15px 0; background-color: #f8f8f8; padding: 10px; }
     strong { font-weight: bold; color: ${theme.primary}; }
@@ -139,9 +138,7 @@ export function useEditorState() {
     sub { vertical-align: sub; font-size: smaller; }
     sup { vertical-align: super; font-size: smaller; }
     hr { border: none; border-top: 1px solid #eee; margin: 20px 0; }
-    img { max-width: 100%; height: auto; display: block; margin: 10px auto; border-radius: 4px; }
-    figure { margin: 10px 0; text-align: center; }
-    figcaption { font-size: 13px; color: #666; margin-top: 6px; }
+    img { max-width: 100%; height: auto; display: block; margin: 0.5em auto; border-radius: 8px; border: 1px solid rgba(0,0,0,0.04); }
     sup.ref-mark { font-size: 12px; color: #888; vertical-align: super; margin-left: 4px; }
     .ref-links { margin-top: 18px; border-top: 1px solid #eee; padding-top: 10px; padding-left: 0; list-style: none; }
     .ref-links li { font-size: 13px; color: #666; margin: 6px 0; word-break: break-all; }

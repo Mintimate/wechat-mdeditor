@@ -8,9 +8,34 @@ import markdownItSup from 'markdown-it-sup'
 import mermaid from 'mermaid'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
-import { inlineStyles, inlineSvgStyles } from '../utils/inlineStyles'
+import { inlineStyles } from '../utils/inlineStyles'
 import { imageUnwrapPlugin, forceTightListPlugin } from '../utils/markdown-it-plugins'
 import { fontFamilies } from './useEditorState'
+
+// 内联 SVG 元素样式（必须在 DOM 中才能获取计算样式）
+function inlineSvgElementStyles(svgEl) {
+  // SVG 样式属性列表
+  const svgProperties = [
+    'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin',
+    'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor',
+    'dominant-baseline', 'alignment-baseline', 'opacity', 'fill-opacity', 'stroke-opacity',
+    'marker-start', 'marker-mid', 'marker-end', 'marker'
+  ]
+  
+  // 遍历 SVG 中的所有元素
+  const allElements = svgEl.querySelectorAll('*')
+  allElements.forEach(el => {
+    if (!(el instanceof SVGElement)) return
+    const computed = window.getComputedStyle(el)
+    svgProperties.forEach(prop => {
+      const val = computed.getPropertyValue(prop)
+      // 只内联有实际值的属性
+      if (val && val !== 'none' && val !== 'auto' && val !== 'inherit' && val !== '') {
+        el.style.setProperty(prop, val)
+      }
+    })
+  })
+}
 
 export function useMarkdownRenderer() {
   const outputHtml = ref('')
@@ -26,13 +51,49 @@ export function useMarkdownRenderer() {
   md.use(markdownItSub)
   md.use(markdownItSup)
 
+  // 自定义列表渲染，手动添加列表符号（微信公众号不支持 list-style）
+  md.renderer.rules.bullet_list_open = () => {
+    return '<ul style="margin:0; padding:0 0 0 21px; list-style:none;">'
+  }
+
+  md.renderer.rules.bullet_list_close = () => {
+    return '</ul>'
+  }
+
+  md.renderer.rules.ordered_list_open = (tokens, idx, options, env) => {
+    const start = tokens[idx].attrGet('start') || 1
+    if (!env._orderedCounters) env._orderedCounters = []
+    env._orderedCounters.push(start)
+    return '<ol style="margin:0; padding:0 0 0 21px; list-style:none;">'
+  }
+
+  md.renderer.rules.ordered_list_close = (tokens, idx, options, env) => {
+    if (env._orderedCounters) env._orderedCounters.pop()
+    return '</ol>'
+  }
+
+  md.renderer.rules.list_item_open = (tokens, idx, options, env) => {
+    // 检查是否在有序列表中
+    const isOrdered = env._orderedCounters && env._orderedCounters.length > 0
+    if (isOrdered) {
+      const num = env._orderedCounters[env._orderedCounters.length - 1]++
+      return `<li style="margin:7px 8px; display:block;">${num}. `
+    }
+    return '<li style="margin:7px 8px; display:block;">• '
+  }
+
+  md.renderer.rules.list_item_close = () => {
+    return '</li>'
+  }
+
   const defaultFence = md.renderer.rules.fence
   md.renderer.rules.fence = (tokens, idx, options, env, self) => {
     const token = tokens[idx]
     const info = token.info.trim()
     if (info === 'mermaid') {
       const id = `mermaid-${Date.now()}-${idx}`
-      return `<div class="mermaid" id="${id}" style="text-align: center; margin: 10px auto;">${token.content}</div>`
+      // 使用 section 标签，避免被当作段落处理
+      return `<section class="mermaid" id="${id}" style="text-align: center; margin: 1em auto;">${token.content}</section>`
     }
     return defaultFence ? defaultFence(tokens, idx, options, env, self) : ''
   }
@@ -83,13 +144,17 @@ export function useMarkdownRenderer() {
         default: captionText = ''; break
       }
 
-      const imgMargin = captionText ? '0 auto' : '10px auto'
-      const imgHtml = `<img src="${esc(src)}" alt="${esc(alt)}"${title ? ` title="${esc(title)}"` : ''} style="max-width:100%; height:auto; display:block; margin:${imgMargin}; border-radius:4px;" />`
+      const imgBorder = 'border:1px solid rgba(0,0,0,0.04);'
+      const imgStyle = captionText 
+        ? `max-width:100%; height:auto; display:block; margin:0 auto; border-radius:8px; ${imgBorder}` 
+        : `max-width:100%; height:auto; display:block; margin:0.5em auto; border-radius:8px; ${imgBorder}`
+      const imgHtml = `<img src="${esc(src)}" alt="${esc(alt)}"${title ? ` title="${esc(title)}"` : ''} style="${imgStyle}" />`
 
       if (captionText) {
-        return `<figure style="margin:10px 0; text-align:center;">${imgHtml}<figcaption style="font-size:13px; color:#666; margin-top:6px;">${esc(captionText)}</figcaption></figure>`
+        // 使用 section 而不是 figure，微信公众号兼容性更好
+        return `<section style="margin:1.5em 8px; text-align:center;">${imgHtml}<section style="font-size:0.8em; color:#888; text-align:center; margin-top:0.5em;">${esc(captionText)}</section></section>`
       }
-      return imgHtml
+      return `<section style="text-align:center; margin:0.5em 0;">${imgHtml}</section>`
     }
 
     let rawHtml = md.render(input)
@@ -139,70 +204,148 @@ export function useMarkdownRenderer() {
 
     const combinedCss = wechatStyle + (codeBlockStyle === 'macos' ? `...` : `...`)
 
-    outputHtml.value = inlineStyles(rawHtml, combinedCss)
+    const styledHtml = inlineStyles(rawHtml, combinedCss)
+    // 用 section 包裹内容，符合微信公众号编辑器规范
+    const baseHtml = `<section style="font-family: ${fontFamilies[currentFont] || 'sans-serif'}; font-size: 16px; line-height: 1.75; color: #3f3f3f;">${styledHtml}</section>`
+    outputHtml.value = baseHtml
 
     await nextTick()
-    setTimeout(async () => {
-      if (!previewContainer.value) return
-
-      const mermaidDivs = previewContainer.value.querySelectorAll('.mermaid')
-      if (mermaidDivs.length === 0) return
-
-      try {
-        mermaid.initialize({ startOnLoad: false, theme: 'neutral', fontSize: 14, securityLevel: 'loose' })
-      } catch (e) {
-        console.warn('Mermaid re-initialization warning:', e)
-      }
-
-      for (const div of mermaidDivs) {
-        const id = div.id
-        const content = div.textContent || ''
+    
+    // 处理 mermaid 渲染
+    if (typeof document !== 'undefined') {
+      const mermaidDivs = styledHtml.match(/class="mermaid"/g)
+      if (mermaidDivs && mermaidDivs.length > 0) {
         try {
-          if (!content.trim()) return
-          const svgId = id + '-svg-' + Date.now()
-          const { svg } = await mermaid.render(svgId, content)
-          div.innerHTML = svg
-          const svgEl = div.querySelector('svg')
-          if (svgEl) {
-            const inlinedSvg = inlineSvgStyles(svgEl)
-            div.innerHTML = inlinedSvg
-            const finalSvgEl = div.querySelector('svg')
-            if (finalSvgEl) {
-              const textElements = finalSvgEl.querySelectorAll('text')
-              textElements.forEach(textEl => {
-                if (!textEl.style.fontSize) {
-                  textEl.style.fontSize = '14px'
-                }
-                if (!textEl.style.fontFamily) {
-                  textEl.style.fontFamily = fontFamilies[currentFont] || 'sans-serif'
-                }
-              })
+          mermaid.initialize({ 
+            startOnLoad: false, 
+            theme: 'default',
+            fontSize: 14, 
+            securityLevel: 'loose',
+            flowchart: { curve: 'basis' },
+            themeVariables: {
+              primaryColor: '#E8F4FD',
+              primaryTextColor: '#333',
+              primaryBorderColor: '#4A90D9',
+              lineColor: '#4A90D9',
+              secondaryColor: '#F5F5F5',
+              tertiaryColor: '#FFF'
+            }
+          })
+        } catch (e) {
+          console.warn('Mermaid re-initialization warning:', e)
+        }
 
-              const vb = finalSvgEl.getAttribute('viewBox')
-              let heightPx = ''
-              if (vb) {
-                const parts = vb.trim().split(/[,\s]+/)
-                if (parts.length === 4) {
-                  const vbW = parseFloat(parts[2])
-                  const vbH = parseFloat(parts[3])
-                  if (vbW > 0 && vbH > 0) {
-                    const renderW = Math.min(vbW, 677)
-                    heightPx = `${Math.round(vbH * renderW / vbW)}px`
+        // 创建一个隐藏的临时容器，插入到 DOM 中以便 getComputedStyle 能工作
+        const tmpDiv = document.createElement('div')
+        tmpDiv.style.position = 'absolute'
+        tmpDiv.style.left = '-9999px'
+        tmpDiv.style.top = '-9999px'
+        tmpDiv.style.width = '800px'
+        tmpDiv.style.visibility = 'hidden'
+        tmpDiv.innerHTML = baseHtml
+        document.body.appendChild(tmpDiv)
+        
+        try {
+          const mermaidElements = tmpDiv.querySelectorAll('.mermaid')
+          for (const div of mermaidElements) {
+            const content = div.textContent || ''
+            try {
+              if (!content.trim()) continue
+              const svgId = 'mermaid-svg-' + Date.now() + '-' + Math.random().toString(36).slice(2)
+              const { svg } = await mermaid.render(svgId, content)
+              div.innerHTML = svg
+              const svgEl = div.querySelector('svg')
+              if (svgEl) {
+                // 设置 SVG 基础样式
+                svgEl.style.maxWidth = '100%'
+                svgEl.style.height = 'auto'
+                svgEl.style.display = 'block'
+                svgEl.style.margin = '0 auto'
+                svgEl.style.backgroundColor = '#ffffff'
+                
+                // 内联 SVG 中所有元素的样式（关键：必须在 DOM 中才能获取计算样式）
+                inlineSvgElementStyles(svgEl)
+                
+                // 设置字体
+                const textElements = svgEl.querySelectorAll('text')
+                textElements.forEach(textEl => {
+                  textEl.style.fontFamily = fontFamilies[currentFont] || 'sans-serif'
+                })
+                
+                // 处理 foreignObject 内的内容，简化 HTML 结构
+                const foreignObjects = svgEl.querySelectorAll('foreignObject')
+                foreignObjects.forEach(fo => {
+                  // 获取所有文本内容
+                  const textContent = fo.textContent || ''
+                  // 查找内部的 p 和 span，简化结构
+                  const innerP = fo.querySelector('p')
+                  if (innerP) {
+                    // 将 p 标签的内容直接设置为文本
+                    innerP.innerHTML = textContent
+                    innerP.style.margin = '0'
+                    innerP.style.padding = '0'
+                  }
+                  // 移除所有 span 的 class
+                  const spans = fo.querySelectorAll('span')
+                  spans.forEach(span => {
+                    span.removeAttribute('class')
+                    span.style.fontSize = '14px'
+                    span.style.fontFamily = fontFamilies[currentFont] || 'sans-serif'
+                    // 如果 span 内还有 span，提取文本
+                    if (span.querySelector('span')) {
+                      const innerText = span.textContent || ''
+                      span.innerHTML = innerText
+                    }
+                  })
+                })
+                
+                // 移除 SVG 内的 style 标签（样式已内联）
+                svgEl.querySelectorAll('style').forEach(s => s.remove())
+                
+                // 根据 viewBox 计算高度
+                const vb = svgEl.getAttribute('viewBox')
+                if (vb) {
+                  const parts = vb.trim().split(/[\s,]+/)
+                  if (parts.length === 4) {
+                    const vbW = parseFloat(parts[2])
+                    const vbH = parseFloat(parts[3])
+                    if (vbW > 0 && vbH > 0) {
+                      const renderW = Math.min(vbW, 677)
+                      svgEl.setAttribute('height', `${Math.round(vbH * renderW / vbW)}px`)
+                    }
                   }
                 }
+                
+                // 创建新的 section 包裹 SVG
+                const newSection = document.createElement('section')
+                newSection.style.textAlign = 'center'
+                newSection.style.margin = '1em auto'
+                newSection.innerHTML = svgEl.outerHTML
+                div.replaceWith(newSection)
               }
-              if (heightPx) finalSvgEl.setAttribute('height', heightPx)
-              else finalSvgEl.removeAttribute('height')
-              finalSvgEl.style.display = 'block'
-              finalSvgEl.style.margin = '0 auto'
+            } catch (e) {
+              console.error('Mermaid render error:', e)
+              const errorSection = document.createElement('section')
+              errorSection.style.color = 'red'
+              errorSection.style.fontSize = '12px'
+              errorSection.textContent = `Mermaid Error: ${e}`
+              div.replaceWith(errorSection)
             }
           }
-        } catch (e) {
-          console.error('Mermaid render error for id ' + id, e)
-          div.innerHTML = `<p style=" color:red; font-size:12px;">Mermaid Error: ${e}</p>`
+          
+          // 清理可能包裹 SVG 的 p 标签
+          let html = tmpDiv.innerHTML
+          // 移除包裹 section 的 p 标签
+          html = html.replace(/<p([^>]*)>\s*<section([^>]*)style="[^"]*text-align:\s*center[^"]*"([^>]*)>/gi, '<section$2style="text-align:center"$3>')
+          html = html.replace(/<\/section>\s*<\/p>/gi, '</section>')
+          
+          outputHtml.value = html
+        } finally {
+          // 清理临时 DOM 元素
+          document.body.removeChild(tmpDiv)
         }
       }
-    }, 100)
+    }
   }
 
   return {
