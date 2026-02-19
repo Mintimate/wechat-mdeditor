@@ -83,27 +83,3 @@ export function inlineStyles(html, css) {
 
   return doc.body.innerHTML
 }
-
-export function inlineSvgStyles(element) {
-  if (!element || !(element instanceof SVGElement)) return ''
-  const allElements = element.querySelectorAll('*')
-  const properties = [
-    'fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'opacity', 'stroke-dasharray', 'text-anchor', 'alignment-baseline', 'dominant-baseline',
-  ]
-  allElements.forEach(el => {
-    if (!(el instanceof SVGElement)) return
-    const computed = window.getComputedStyle(el)
-    properties.forEach(prop => {
-      const val = computed.getPropertyValue(prop)
-      if (val && val !== 'auto' && val !== 'inherit') el.style.setProperty(prop, val)
-    })
-  })
-
-  const svgComputed = window.getComputedStyle(element)
-  if (svgComputed.backgroundColor === 'rgba(0, 0, 0, 0)' || svgComputed.backgroundColor === 'transparent') element.style.backgroundColor = '#ffffff'
-  else element.style.backgroundColor = svgComputed.backgroundColor
-  element.querySelectorAll('style').forEach(s => s.remove())
-  element.style.maxWidth = '100%'
-  element.style.height = 'auto'
-  return element.outerHTML
-}

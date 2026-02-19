@@ -1,4 +1,4 @@
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick } from 'vue'
 import MarkdownIt from 'markdown-it'
 import markdownItTaskLists from 'markdown-it-task-lists'
 import markdownItIns from 'markdown-it-ins'
@@ -202,7 +202,7 @@ export function useMarkdownRenderer() {
       rawHtml = tmp.innerHTML
     }
 
-    const combinedCss = wechatStyle + (codeBlockStyle === 'macos' ? `...` : `...`)
+    const combinedCss = wechatStyle
 
     const styledHtml = inlineStyles(rawHtml, combinedCss)
     // 用 section 包裹内容，符合微信公众号编辑器规范
