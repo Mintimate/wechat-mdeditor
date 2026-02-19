@@ -1,11 +1,29 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Codemirror } from 'vue-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { languages } from '@codemirror/language-data';
 import { useEditorState } from '../../composables/useEditorState';
 
-const { input } = useEditorState();
+const { input, isDark } = useEditorState();
+
+// 动态扩展配置
+const extensions = computed(() => {
+  const ext = [markdown({ codeLanguages: languages })];
+  if (isDark.value) {
+    ext.push(oneDark);
+  }
+  return ext;
+});
+
+// 编辑器样式
+const editorStyle = computed(() => ({
+  height: '100%',
+  fontSize: '14px',
+  backgroundColor: isDark.value ? '#1e1e1e' : '#ffffff',
+  color: isDark.value ? '#d4d4d4' : '#1f2937',
+}));
 </script>
 
 <template>
@@ -17,11 +35,11 @@ const { input } = useEditorState();
         <Codemirror
         v-model="input"
         placeholder="在此输入 Markdown 内容..."
-        :style="{ height: '100%', fontSize: '14px' }"
+        :style="editorStyle"
         :autofocus="true"
         :indent-with-tab="true"
         :tab-size="2"
-        :extensions="[markdown({ codeLanguages: languages }), oneDark]"
+        :extensions="extensions"
         />
     </div>
   </div>

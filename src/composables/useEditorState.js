@@ -10,6 +10,7 @@ import { defaultDemo } from '../demos'
 
 const STORAGE_KEY_CONTENT = 'wechat-md-content'
 const STORAGE_KEY_AUTOSAVE = 'wechat-md-autosave'
+const STORAGE_KEY_DARK_MODE = 'wechat-md-dark-mode'
 
 const input = ref(defaultDemo)
 
@@ -20,6 +21,41 @@ const codeBlockStyle = ref('default')
 const headingStyle = ref('classic')
 const autoSave = ref(true)
 const imageCaptionMode = ref('title-priority')
+
+// 暗色模式状态: 'light' | 'system' | 'dark'
+const darkMode = ref('system')
+
+// 系统偏好（用于响应式跟踪）
+const systemPrefersDark = ref(false)
+
+// 计算当前是否为暗色模式
+const isDark = computed(() => {
+  if (darkMode.value === 'dark') return true
+  if (darkMode.value === 'light') return false
+  return systemPrefersDark.value
+})
+
+// 应用暗色模式
+const applyDarkMode = () => {
+  systemPrefersDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const html = document.documentElement
+  if (isDark.value) {
+    html.classList.add('dark')
+  } else {
+    html.classList.remove('dark')
+  }
+}
+
+// 监听系统主题变化
+let mediaQueryListener = null
+const setupSystemListener = () => {
+  if (mediaQueryListener) {
+    mediaQueryListener.removeEventListener('change', applyDarkMode)
+  }
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQueryListener = mediaQuery
+  mediaQuery.addEventListener('change', applyDarkMode)
+}
 
 export function useEditorState() {
   const wechatStyle = computed(() => {
@@ -68,6 +104,12 @@ export function useEditorState() {
     }
   })
 
+  // 监听暗色模式变化
+  watch(darkMode, (newVal) => {
+    localStorage.setItem(STORAGE_KEY_DARK_MODE, newVal)
+    applyDarkMode()
+  })
+
   onMounted(() => {
     const savedAutoSave = localStorage.getItem(STORAGE_KEY_AUTOSAVE)
     if (savedAutoSave !== null) {
@@ -78,6 +120,14 @@ export function useEditorState() {
     if (autoSave.value && savedContent) {
       input.value = savedContent
     }
+
+    // 初始化暗色模式
+    const savedDarkMode = localStorage.getItem(STORAGE_KEY_DARK_MODE)
+    if (savedDarkMode && ['light', 'system', 'dark'].includes(savedDarkMode)) {
+      darkMode.value = savedDarkMode
+    }
+    setupSystemListener()
+    applyDarkMode()
   })
 
   return {
@@ -89,6 +139,8 @@ export function useEditorState() {
     headingStyle,
     autoSave,
     imageCaptionMode,
+    darkMode,
+    isDark,
     wechatStyle,
     // 配置导出
     themeColors,

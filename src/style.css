@@ -1,1 +1,4 @@
 @import "tailwindcss";
+
+/* 使用 selector 策略控制暗色模式 */
+@custom-variant dark (&:where(.dark, .dark *));

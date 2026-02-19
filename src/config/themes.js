@@ -4,38 +4,38 @@
  * secondary: 次要颜色（通常用于背景等）
  */
 export const themes = {
+  orange: {
+    name: '焕能橙',
+    primary: '#f97316',
+    secondary: 'rgba(255, 107, 107, 0.1)',
+  },
+  purple: {
+    name: '编程紫',
+    primary: '#674AF6',
+    secondary: 'rgba(103, 74, 246, 0.1)',
+  },
   green: {
     name: '微信绿',
     primary: '#07c160',
     secondary: 'rgba(7, 193, 96, 0.1)',
   },
-  orange: {
-    name: '活力橙',
-    primary: '#ff6b6b',
-    secondary: 'rgba(255, 107, 107, 0.1)',
-  },
-  purple: {
-    name: '优雅紫',
-    primary: '#6f42c1',
-    secondary: 'rgba(111, 66, 193, 0.1)',
-  },
   blue: {
-    name: '科技蓝',
+    name: '源码蓝',
     primary: '#0366d6',
     secondary: 'rgba(3, 102, 214, 0.1)',
   },
   cyan: {
-    name: '清新青',
+    name: '极光青',
     primary: '#00bcd4',
     secondary: 'rgba(0, 188, 212, 0.1)',
   },
   pink: {
-    name: '浪漫粉',
-    primary: '#e91e63',
-    secondary: 'rgba(233, 30, 99, 0.1)',
+    name: '樱花粉',
+    primary: '#CF6C88',
+    secondary: 'rgba(207, 57, 100, 0.1)',
   },
   gold: {
-    name: '尊贵金',
+    name: '构建金',
     primary: '#ff9800',
     secondary: 'rgba(255, 152, 0, 0.1)',
   },

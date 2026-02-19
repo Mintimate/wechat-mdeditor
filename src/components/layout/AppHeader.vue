@@ -8,7 +8,8 @@ const {
   codeBlockStyle,
   headingStyle,
   imageCaptionMode,
-  autoSave
+  autoSave,
+  darkMode
 } = useEditorState();
 
 const emit = defineEmits<{
@@ -39,6 +40,13 @@ const headingOptions = Object.entries(headingStyles).map(([key, config]) => ({
   value: key,
   label: config.name
 }));
+
+// 暗色模式选项
+const darkModeOptions = [
+  { value: 'light', label: '亮色' },
+  { value: 'system', label: '系统' },
+  { value: 'dark', label: '暗色' }
+] as const;
 </script>
 
 <template>
@@ -99,6 +107,47 @@ const headingOptions = Object.entries(headingStyles).map(([key, config]) => ({
           <div class="absolute w-3 h-3 transition-transform duration-200 ease-in-out transform bg-white rounded-full top-0.5 left-0.5" :class="autoSave ? 'translate-x-4' : 'translate-x-0'"></div>
         </div>
         <label class="text-xs text-gray-500 font-medium cursor-pointer group-hover:text-orange-500 transition-colors">自动保存</label>
+      </div>
+
+      <!-- 三段式暗色模式切换器 -->
+      <div class="relative flex items-center bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors">
+        <!-- 滑块背景 -->
+        <div 
+          class="absolute top-1 w-7 h-7 bg-white dark:bg-gray-600 rounded-full shadow-md transition-transform duration-300 ease-in-out"
+          :style="{ transform: `translateX(${darkMode === 'light' ? '0' : darkMode === 'system' ? '28px' : '56px'})` }"
+        ></div>
+        <!-- 三个按钮 -->
+        <button 
+          v-for="opt in darkModeOptions" 
+          :key="opt.value"
+          @click="darkMode = opt.value"
+          class="relative z-10 w-7 h-7 flex items-center justify-center transition-colors duration-200 rounded-full"
+          :class="darkMode === opt.value ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+          :title="opt.label"
+        >
+          <!-- 太阳图标 - 亮色模式 -->
+          <svg v-if="opt.value === 'light'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <!-- 系统/电脑图标 - 跟随系统 -->
+          <svg v-else-if="opt.value === 'system'" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          <!-- 月亮图标 - 暗色模式 -->
+          <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
       </div>
 
       <button 
