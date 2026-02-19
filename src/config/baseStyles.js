@@ -20,8 +20,8 @@ export const generateBaseStyles = ({ font, size, primary, secondary }) => {
   `
 
   const listStyle = `
-    ul { margin: 0; padding: 0 0 0 21px; list-style: none; }
-    ol { margin: 0; padding: 0 0 0 21px; list-style: none; }
+    ul { margin: 0; padding: 0 0 0 12px; list-style: none; }
+    ol { margin: 0; padding: 0 0 0 12px; list-style: none; }
     li { font-family: ${font}; font-size: ${size}px; color: #3f3f3f; line-height: 1.75; margin: 7px 8px; display: block; }
     li p { display: inline; margin: 0; padding: 0; }
     ul ul, ol ol, ul ol, ol ul { margin: 0; padding-left: 21px; }

@@ -53,7 +53,7 @@ export function useMarkdownRenderer() {
 
   // 自定义列表渲染，手动添加列表符号（微信公众号不支持 list-style）
   md.renderer.rules.bullet_list_open = () => {
-    return '<ul style="margin:0; padding:0 0 0 21px; list-style:none;">'
+    return '<ul style="margin:0; padding:0 0 0 12px; list-style:none;">'
   }
 
   md.renderer.rules.bullet_list_close = () => {
@@ -64,7 +64,7 @@ export function useMarkdownRenderer() {
     const start = tokens[idx].attrGet('start') || 1
     if (!env._orderedCounters) env._orderedCounters = []
     env._orderedCounters.push(start)
-    return '<ol style="margin:0; padding:0 0 0 21px; list-style:none;">'
+    return '<ol style="margin:0; padding:0 0 0 12px; list-style:none;">'
   }
 
   md.renderer.rules.ordered_list_close = (tokens, idx, options, env) => {
