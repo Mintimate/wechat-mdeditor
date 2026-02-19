@@ -100,18 +100,39 @@ defineExpose({
        <!-- Phone Frame -->
        <div class="relative w-[375px] h-[812px] bg-white dark:bg-gray-800 rounded-[50px] shadow-[0_0_0_12px_#1f2937] border-[8px] border-gray-900 dark:border-gray-700 overflow-hidden shrink-0 ring-1 ring-white/20">
           
-          <!-- Notch/Status Bar Area -->
-          <div class="absolute top-0 left-0 right-0 h-10 bg-white dark:bg-gray-800 z-20 flex justify-between items-end px-6 pb-2 select-none pointer-events-none">
-            <span class="text-xs font-semibold text-gray-900 dark:text-white">9:41</span>
-            <div class="flex gap-1.5">
-               <div class="w-4 h-2.5 bg-gray-900 dark:bg-white rounded-[1px]"></div>
-               <div class="w-4 h-2.5 bg-gray-900 dark:bg-white rounded-[1px]"></div>
-               <div class="w-5 h-2.5 border border-gray-900 dark:border-white rounded-[2px] relative flex items-center justify-center">
-                 <div class="w-3 h-1.5 bg-gray-900 dark:bg-white inset-0.5"></div>
-               </div>
+          <!-- Dynamic Island / Status Bar Area -->
+          <div class="absolute top-0 left-0 right-0 h-12 bg-white dark:bg-gray-800 z-20 flex justify-between items-center px-8 pt-2 select-none pointer-events-none">
+            <!-- Time -->
+            <span class="text-sm font-semibold text-gray-900 dark:text-white">9:41</span>
+            
+            <!-- Status Icons (Signal, WiFi, Battery) -->
+            <div class="flex items-center gap-1.5">
+              <!-- Cellular Signal -->
+              <div class="flex items-end gap-0.5 h-3">
+                <div class="w-0.5 h-1 bg-gray-900 dark:bg-white rounded-[0.5px]"></div>
+                <div class="w-0.5 h-1.5 bg-gray-900 dark:bg-white rounded-[0.5px]"></div>
+                <div class="w-0.5 h-2 bg-gray-900 dark:bg-white rounded-[0.5px]"></div>
+                <div class="w-0.5 h-2.5 bg-gray-900 dark:bg-white rounded-[0.5px]"></div>
+              </div>
+              
+              <!-- WiFi Icon -->
+              <svg class="w-4 h-3.5 text-gray-900 dark:text-white" viewBox="0 0 16 14" fill="currentColor">
+                <path d="M8 11a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>
+                <path d="M3.5 7.5a6.5 6.5 0 019 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <path d="M1 4.5a10 10 0 0114 0" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              </svg>
+              
+              <!-- Battery -->
+              <div class="flex items-center gap-0.5">
+                <div class="w-6 h-3 border border-gray-900 dark:border-white rounded-[3px] relative flex items-center p-[1.5px]">
+                  <div class="w-full h-full bg-gray-900 dark:bg-white rounded-[1.5px]"></div>
+                </div>
+                <div class="w-0.5 h-1.5 bg-gray-900 dark:bg-white rounded-r-full"></div>
+              </div>
             </div>
-            <!-- Notch cutout -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-2xl"></div>
+            
+            <!-- Dynamic Island -->
+            <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-8 bg-black rounded-[20px]"></div>
           </div>
 
           <!-- Content Area (Scrollable within phone) -->
