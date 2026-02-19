@@ -18,6 +18,51 @@ export const imageUnwrapPlugin = (md) => {
   })
 }
 
+export const rubyPlugin = (md) => {
+  // 匹配 {文字|读音} 格式
+  const RUBY_REGEX = /\{([^|}]+)\|([^}]+)\}/g
+
+  md.inline.ruler.before('emphasis', 'ruby', (state, silent) => {
+    const pos = state.pos
+    const src = state.src
+
+    if (src.charCodeAt(pos) !== 0x7B /* { */) {
+      return false
+    }
+
+    // 查找匹配的 {文字|读音} 模式
+    const match = RUBY_REGEX.exec(src.slice(pos))
+    if (!match || match.index !== 0) {
+      RUBY_REGEX.lastIndex = 0 // 重置正则
+      return false
+    }
+
+    if (silent) {
+      return true
+    }
+
+    const text = match[1]
+    const rt = match[2]
+
+    const token = state.push('ruby', 'ruby', 0)
+    token.content = text
+    token.rt = rt
+    token.markup = match[0]
+
+    state.pos += match[0].length
+    RUBY_REGEX.lastIndex = 0 // 重置正则
+
+    return true
+  })
+
+  md.renderer.rules.ruby = (tokens, idx) => {
+    const text = md.utils.escapeHtml(tokens[idx].content)
+    const rt = md.utils.escapeHtml(tokens[idx].rt)
+    // 微信公众号兼容的 ruby 标签
+    return `<ruby style="ruby-align:center;">${text}<rp>(</rp><rt style="font-size:0.6em; color:#888;">${rt}</rt><rp>)</rp></ruby>`
+  }
+}
+
 export const forceTightListPlugin = (md) => {
   md.core.ruler.push('force-tight-list', (state) => {
     const tokens = state.tokens
