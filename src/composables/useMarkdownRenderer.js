@@ -10,7 +10,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import { inlineStyles } from '../utils/inlineStyles'
 import { imageUnwrapPlugin, forceTightListPlugin } from '../utils/markdown-it-plugins'
-import { fontFamilies } from './useEditorState'
+import { fonts, codeBlockStyles } from '../config'
 
 // 内联 SVG 元素样式（必须在 DOM 中才能获取计算样式）
 function inlineSvgElementStyles(svgEl) {
@@ -114,11 +114,12 @@ export function useMarkdownRenderer() {
           content = md.utils.escapeHtml(str)
         }
 
-        if (codeBlockStyle === 'macos') {
-          const macHeader = `<div style="display: flex; gap: 6px; margin-bottom: 10px; align-items: center;"><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ff5f56; border: 1px solid #e0443e; display: inline-block;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ffbd2e; border: 1px solid #dea123; display: inline-block;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #27c93f; border: 1px solid #1aab29; display: inline-block;"></span></div>`
-          return `<pre class="hljs macos" style="background: #282c34; color: #abb2bf; padding: 15px; border-radius: 8px; overflow-x: auto;">${macHeader}<code style="font-family: Menlo, Monaco, Consolas, monospace; font-size: 13px; line-height: 1.5; background: transparent;">${content}</code></pre>`
+        // 使用配置中的代码块样式
+        const styleConfig = codeBlockStyles[codeBlockStyle]
+        const fontFamily = fonts[currentFont]?.value || fonts.sans.value
+        if (styleConfig && styleConfig.highlightPre) {
+          return styleConfig.highlightPre(content, fontFamily)
         }
-
         return '<pre class="hljs"><code>' + content + '</code></pre>'
       }
     })
@@ -206,7 +207,7 @@ export function useMarkdownRenderer() {
 
     const styledHtml = inlineStyles(rawHtml, combinedCss)
     // 用 section 包裹内容，符合微信公众号编辑器规范
-    const baseHtml = `<section style="font-family: ${fontFamilies[currentFont] || 'sans-serif'}; font-size: 16px; line-height: 1.75; color: #3f3f3f;">${styledHtml}</section>`
+    const baseHtml = `<section style="font-family: ${fonts[currentFont]?.value || 'sans-serif'}; font-size: 16px; line-height: 1.75; color: #3f3f3f;">${styledHtml}</section>`
     outputHtml.value = baseHtml
 
     await nextTick()
@@ -269,7 +270,7 @@ export function useMarkdownRenderer() {
                 // 设置字体
                 const textElements = svgEl.querySelectorAll('text')
                 textElements.forEach(textEl => {
-                  textEl.style.fontFamily = fontFamilies[currentFont] || 'sans-serif'
+                  textEl.style.fontFamily = fonts[currentFont]?.value || 'sans-serif'
                 })
                 
                 // 处理 foreignObject 内的内容，简化 HTML 结构
@@ -290,7 +291,7 @@ export function useMarkdownRenderer() {
                   spans.forEach(span => {
                     span.removeAttribute('class')
                     span.style.fontSize = '14px'
-                    span.style.fontFamily = fontFamilies[currentFont] || 'sans-serif'
+                    span.style.fontFamily = fonts[currentFont]?.value || 'sans-serif'
                     // 如果 span 内还有 span，提取文本
                     if (span.querySelector('span')) {
                       const innerText = span.textContent || ''

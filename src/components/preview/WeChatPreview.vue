@@ -9,15 +9,15 @@ const {
   currentFont, 
   currentSize, 
   codeBlockStyle, 
+  headingStyle,
   imageCaptionMode, 
-  wechatStyle,
-  autoSave
+  wechatStyle
 } = useEditorState();
 
 const { outputHtml, previewContainer, render } = useMarkdownRenderer();
 
 // Watch for changes and re-render
-watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, imageCaptionMode], () => {
+watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, headingStyle, imageCaptionMode], () => {
     render({
         input: input.value,
         codeBlockStyle: codeBlockStyle.value,

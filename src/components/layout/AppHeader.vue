@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { useEditorState } from '../../composables/useEditorState';
+import { useEditorState, themes, fonts, codeBlockStyles, headingStyles } from '../../composables/useEditorState';
 
 const { 
   currentTheme,
   currentFont,
   currentSize,
   codeBlockStyle,
+  headingStyle,
   imageCaptionMode,
   autoSave
 } = useEditorState();
@@ -17,6 +18,27 @@ const emit = defineEmits<{
 const handleCopy = () => {
   emit('copy');
 };
+
+// 动态生成选项
+const themeOptions = Object.entries(themes).map(([key, config]) => ({
+  value: key,
+  label: config.name
+}));
+
+const fontOptions = Object.entries(fonts).map(([key, config]) => ({
+  value: key,
+  label: config.name
+}));
+
+const codeBlockOptions = Object.entries(codeBlockStyles).map(([key, config]) => ({
+  value: key,
+  label: config.name
+}));
+
+const headingOptions = Object.entries(headingStyles).map(([key, config]) => ({
+  value: key,
+  label: config.name
+}));
 </script>
 
 <template>
@@ -29,18 +51,14 @@ const handleCopy = () => {
       <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1">
         <label class="text-xs text-gray-500 font-medium">主题</label>
         <select v-model="currentTheme" class="bg-transparent border-none text-gray-700 text-sm focus:ring-0 cursor-pointer py-1 pr-8 pl-1 dark:text-gray-200 hover:text-orange-500 transition-colors">
-          <option value="green">微信绿</option>
-          <option value="orange">活力橙</option>
-          <option value="purple">开发紫</option>
+          <option v-for="opt in themeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1">
         <label class="text-xs text-gray-500 font-medium">字体</label>
         <select v-model="currentFont" class="bg-transparent border-none text-gray-700 text-sm focus:ring-0 cursor-pointer py-1 pr-8 pl-1 dark:text-gray-200 hover:text-orange-500 transition-colors">
-          <option value="sans">无衬线</option>
-          <option value="serif">衬线</option>
-          <option value="mono">等宽</option>
+          <option v-for="opt in fontOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
@@ -51,15 +69,21 @@ const handleCopy = () => {
       </div>
 
       <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1">
-        <label class="text-xs text-gray-500 font-medium">风格</label>
+        <label class="text-xs text-gray-500 font-medium">代码</label>
         <select v-model="codeBlockStyle" class="bg-transparent border-none text-gray-700 text-sm focus:ring-0 cursor-pointer py-1 pr-8 pl-1 dark:text-gray-200 hover:text-orange-500 transition-colors">
-          <option value="default">默认</option>
-          <option value="macos">macOS</option>
+          <option v-for="opt in codeBlockOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
       </div>
 
       <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1">
-        <label class="text-xs text-gray-500 font-medium">图片文本</label>
+        <label class="text-xs text-gray-500 font-medium">标题</label>
+        <select v-model="headingStyle" class="bg-transparent border-none text-gray-700 text-sm focus:ring-0 cursor-pointer py-1 pr-8 pl-1 dark:text-gray-200 hover:text-orange-500 transition-colors">
+          <option v-for="opt in headingOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1">
+        <label class="text-xs text-gray-500 font-medium">图片</label>
         <select v-model="imageCaptionMode" class="bg-transparent border-none text-gray-700 text-sm focus:ring-0 cursor-pointer py-1 pr-8 pl-1 dark:text-gray-200 hover:text-orange-500 transition-colors">
           <option value="title-priority">title 优先</option>
           <option value="alt-priority">alt 优先</option>
