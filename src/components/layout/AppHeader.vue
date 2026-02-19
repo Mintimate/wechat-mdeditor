@@ -44,6 +44,7 @@ const headingOptions = Object.entries(headingStyles).map(([key, config]) => ({
 <template>
   <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-6 py-3 flex justify-between items-center gap-4 shadow-sm transition-all duration-300">
     <h1 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2 tracking-tight">
+      <img src="/favicon.png" alt="Logo" class="w-6 h-6">
       <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">WeChat</span> Markdown
     </h1>
 
