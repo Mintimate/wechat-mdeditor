@@ -48,13 +48,14 @@ const headingOptions = Object.entries(headingStyles).map(([key, config]) => ({
 // 字号描述映射
 const getSizeLabel = (size: number): string => {
   const labels: Record<number, string> = {
-    14: '较小',
-    15: '偏小',
-    16: '适中',
-    17: '还行',
-    18: '偏大',
-    19: '较大ヽ(???)メ',
-    20: '好大(°△°|||)'
+    12: '很小(?-ω-)',
+    13: '较小',
+    14: '偏小',
+    15: '适中',
+    16: '还行',
+    17: '偏大',
+    18: '较大ヽ(???)メ',
+    19: '好大(°△°|||)'
   };
   return labels[size] || '适中';
 };
