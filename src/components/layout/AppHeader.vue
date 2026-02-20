@@ -96,7 +96,7 @@ const darkModeOptions = [
         <!-- 字号控制 -->
         <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1 group relative">
           <label class="text-xs text-gray-500 font-medium">字号</label>
-          <input type="range" v-model.number="currentSize" min="14" max="20" step="1" class="w-16 h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-orange-500">
+          <input type="range" v-model.number="currentSize" min="12" max="19" step="1" class="w-16 h-1.5 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-orange-500">
           <!-- 自定义 Tooltip -->
           <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg z-50">
             {{ getSizeLabel(currentSize) }}
