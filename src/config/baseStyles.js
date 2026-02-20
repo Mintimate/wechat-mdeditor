@@ -8,10 +8,11 @@
  * @param {Object} options - 配置选项
  * @param {string} options.font - 字体
  * @param {number} options.size - 基础字号
- * @param {string} options.primary - 主题主色
- * @param {string} options.secondary - 主题次要色
+ * @param {string} options.primary - 主要强调色（用于粗体等强强调）
+ * @param {string} options.tertiary - 三级色（用于链接引用等柔和强调）
+ * @param {string} options.secondary - 次要色（用于背景高亮）
  */
-export const generateBaseStyles = ({ font, size, primary, secondary }) => {
+export const generateBaseStyles = ({ font, size, primary, tertiary, secondary }) => {
   const tableStyle = `
     table { border-collapse: collapse; margin: 0; width: 100%; display: table; font-size: 14px; min-width: max-content; }
     th { background-color: #f2f2f2; font-weight: bold; border: 1px solid #ddd; padding: 8px; text-align: left; min-width: 60px; white-space: nowrap; }
@@ -40,9 +41,11 @@ export const generateBaseStyles = ({ font, size, primary, secondary }) => {
     sup { vertical-align: super; font-size: smaller; }
     hr { border: none; border-top: 1px solid #eee; margin: 20px 0; }
     img { max-width: 100%; height: auto; display: block; margin: 0.5em auto; border-radius: 8px; border: 1px solid rgba(0,0,0,0.04); }
-    sup.ref-mark { font-size: 12px; color: #888; vertical-align: super; margin-left: 4px; }
+    sup.ref-mark { font-size: 10px; color: ${tertiary}; vertical-align: super; margin-left: 4px; }
     .ref-links { margin-top: 18px; border-top: 1px solid #eee; padding-top: 10px; padding-left: 0; list-style: none; }
-    .ref-links li { font-size: 13px; color: #666; margin: 6px 0; word-break: break-all; }
+    .ref-links li { font-size: 12px; color: #666; margin: 6px 0; word-break: break-all; line-height: 1.6; }
+    .ref-links li span { font-size: 12px; }
+    .ref-text { color: ${tertiary}; }
     ${tableStyle}
   `
 }

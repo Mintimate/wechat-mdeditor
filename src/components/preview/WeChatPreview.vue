@@ -12,7 +12,8 @@ const {
   codeBlockStyle, 
   headingStyle,
   imageCaptionMode, 
-  wechatStyle
+  wechatStyle,
+  themeColors
 } = useEditorState();
 
 const { outputHtml, previewContainer, render } = useMarkdownRenderer();
@@ -22,23 +23,27 @@ const previewScrollContainer = ref<HTMLElement | null>(null);
 
 // Watch for changes and re-render
 watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, headingStyle, imageCaptionMode], () => {
+    const theme = themeColors.value[currentTheme.value];
     render({
         input: input.value,
         codeBlockStyle: codeBlockStyle.value,
         imageCaptionMode: imageCaptionMode.value,
         currentFont: currentFont.value,
-        wechatStyle: wechatStyle.value
+        wechatStyle: wechatStyle.value,
+        themeTertiary: theme?.tertiary || '#ea7c4d'
     });
 });
 
 onMounted(() => {
     // Initial Render
+    const theme = themeColors.value[currentTheme.value];
     render({
         input: input.value,
         codeBlockStyle: codeBlockStyle.value,
         imageCaptionMode: imageCaptionMode.value,
         currentFont: currentFont.value,
-        wechatStyle: wechatStyle.value
+        wechatStyle: wechatStyle.value,
+        themeTertiary: theme?.tertiary || '#ea7c4d'
     });
 });
 

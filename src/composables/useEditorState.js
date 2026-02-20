@@ -76,7 +76,7 @@ export function useEditorState() {
     const headingStyleCss = headingStyleConfig ? headingStyleConfig.generate(theme.primary, font, size) : ''
 
     // 基础样式
-    const baseStyle = generateBaseStyles({ font, size, primary: theme.primary, secondary: theme.secondary })
+    const baseStyle = generateBaseStyles({ font, size, primary: theme.primary, tertiary: theme.tertiary, secondary: theme.secondary })
 
     return `
     ${headingStyleCss}

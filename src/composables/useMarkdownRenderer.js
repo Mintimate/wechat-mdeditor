@@ -110,7 +110,8 @@ export function useMarkdownRenderer() {
   }
 
   const render = async (opts) => {
-    const { input, codeBlockStyle, imageCaptionMode, currentFont, wechatStyle } = opts
+    const { input, codeBlockStyle, imageCaptionMode, currentFont, wechatStyle, themeTertiary } = opts
+    const tertiaryColor = themeTertiary || '#ea7c4d'
 
     md.set({
       highlight: function (str, lang) {
@@ -180,17 +181,19 @@ export function useMarkdownRenderer() {
       anchors.forEach(a => {
         const href = a.getAttribute('href') || ''
         if (!href || !/^https?:\/\//i.test(href)) return
+        const linkText = a.textContent || ''
         if (!linkIndex.has(href)) {
-          linkIndex.set(href, linkIndex.size + 1)
-          links.push(href)
+          linkIndex.set(href, { index: linkIndex.size + 1, text: linkText })
+          links.push({ url: href, text: linkText })
         }
-        const number = linkIndex.get(href)
+        const { index: number } = linkIndex.get(href)
         const span = document.createElement('span')
+        span.className = 'ref-text'
         span.innerHTML = a.innerHTML
         const sup = document.createElement('sup')
         sup.className = 'ref-mark'
         sup.textContent = `[${number}]`
-        sup.setAttribute('style', 'font-size:12px; color:#888; vertical-align:super; margin-left:4px;')
+        sup.setAttribute('style', `font-size:12px; color:${tertiaryColor}; vertical-align:super; margin-left:4px;`)
         span.appendChild(sup)
         a.replaceWith(span)
       })
@@ -203,10 +206,19 @@ export function useMarkdownRenderer() {
         const ul = document.createElement('ul')
         ul.className = 'ref-links'
         ul.setAttribute('style', 'padding-left:0; margin:10px 0; list-style:none;')
-        links.forEach((url, i) => {
+        links.forEach((link, i) => {
           const li = document.createElement('li')
-          li.setAttribute('style', 'font-size:13px; color:#666; margin:6px 0; word-break:break-all;')
-          li.textContent = `[${i + 1}] ${url}`
+          li.setAttribute('style', 'font-size:13px; color:#666; margin:6px 0; word-break:break-all; line-height:1.6;')
+          const numSpan = document.createElement('span')
+          numSpan.textContent = `[${i + 1}] `
+          const textSpan = document.createElement('span')
+          textSpan.textContent = link.text ? `${link.text}: ` : ''
+          const urlSpan = document.createElement('span')
+          urlSpan.style.fontStyle = 'italic'
+          urlSpan.textContent = link.url
+          li.appendChild(numSpan)
+          if (link.text) li.appendChild(textSpan)
+          li.appendChild(urlSpan)
           ul.appendChild(li)
         })
         tmp.appendChild(ul)
