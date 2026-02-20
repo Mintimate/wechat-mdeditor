@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useEditorState } from '../../composables/useEditorState';
 import { useMarkdownRenderer } from '../../composables/useMarkdownRenderer';
 import { useNotification } from '../../composables/useNotification';
@@ -17,6 +17,8 @@ const {
 
 const { outputHtml, previewContainer, render } = useMarkdownRenderer();
 const { success, error } = useNotification();
+
+const previewScrollContainer = ref<HTMLElement | null>(null);
 
 // Watch for changes and re-render
 watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, headingStyle, imageCaptionMode], () => {
@@ -81,7 +83,8 @@ const copyToClipboard = async () => {
 };
 
 defineExpose({
-    copyToClipboard
+    copyToClipboard,
+    previewScrollContainer
 });
 
 </script>
@@ -136,16 +139,16 @@ defineExpose({
           </div>
 
           <!-- Content Area (Scrollable within phone) -->
-          <div class="h-full w-full overflow-y-auto pt-12 pb-8 scrollbar-hide bg-white" id="wx-box">
+          <div ref="previewScrollContainer" class="h-full w-full overflow-y-auto pt-12 scrollbar-hide bg-white" id="wx-box">
             <!-- Wrapper for padding text content -->
             <div 
               ref="previewContainer" 
-              class="wx-content p-4 min-h-full"
+              class="wx-content p-4 min-h-full pb-20"
               v-html="outputHtml"
             ></div>
             
             <!-- Bottom Home Indicator with Author Info -->
-            <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur rounded-b-[40px] pb-2">
+            <div class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur pb-2">
                <!-- Author Info -->
                <div class="flex justify-center items-center gap-4 pt-2 px-4 text-xs">
                  <a href="https://github.com/Mintimate" target="_blank" class="text-gray-500 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors flex items-center gap-1">
