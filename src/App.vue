@@ -1,73 +1,73 @@
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import AppHeader from './components/layout/AppHeader.vue';
-import MarkdownEditor from './components/editor/MarkdownEditor.vue';
-import WeChatPreview from './components/preview/WeChatPreview.vue';
-import NotificationToast from './components/ui/NotificationToast.vue';
+<script setup>
+import { onMounted, onUnmounted, ref } from 'vue'
+import MarkdownEditor from './components/editor/MarkdownEditor.vue'
+import AppHeader from './components/layout/AppHeader.vue'
+import WeChatPreview from './components/preview/WeChatPreview.vue'
+import NotificationToast from './components/ui/NotificationToast.vue'
 
-const editorRef = ref<InstanceType<typeof MarkdownEditor> | null>(null);
-const previewRef = ref<InstanceType<typeof WeChatPreview> | null>(null);
+const editorRef = ref(null)
+const previewRef = ref(null)
 
-const isSyncing = ref(false);
-const syncScrollEnabled = ref(true);
+const isSyncing = ref(false)
+const syncScrollEnabled = ref(true)
 
 // 处理编辑器滚动事件
-const handleEditorScroll = (e: CustomEvent) => {
+const handleEditorScroll = (e) => {
   if (!syncScrollEnabled.value || isSyncing.value || !previewRef.value?.previewScrollContainer) return;
   
   isSyncing.value = true;
-  const ratio = e.detail;
-  const container = previewRef.value.previewScrollContainer;
-  const maxScroll = container.scrollHeight - container.clientHeight;
+  const ratio = e.detail
+  const container = previewRef.value.previewScrollContainer
+  const maxScroll = container.scrollHeight - container.clientHeight
   
   if (maxScroll > 0) {
-    container.scrollTop = ratio * maxScroll;
+    container.scrollTop = ratio * maxScroll
   }
   
-  setTimeout(() => { isSyncing.value = false; }, 50);
-};
+  setTimeout(() => { isSyncing.value = false }, 50)
+}
 
 // 处理预览区滚动事件
 const handlePreviewScroll = () => {
-  if (!syncScrollEnabled.value || isSyncing.value || !previewRef.value?.previewScrollContainer || !editorRef.value?.editorScrollContainer) return;
+  if (!syncScrollEnabled.value || isSyncing.value || !previewRef.value?.previewScrollContainer || !editorRef.value?.editorScrollContainer) return
   
-  const previewContainer = previewRef.value.previewScrollContainer;
-  const editorContainer = editorRef.value.editorScrollContainer;
+  const previewContainer = previewRef.value.previewScrollContainer
+  const editorContainer = editorRef.value.editorScrollContainer
   
-  const maxPreviewScroll = previewContainer.scrollHeight - previewContainer.clientHeight;
-  const maxEditorScroll = editorContainer.scrollHeight - editorContainer.clientHeight;
+  const maxPreviewScroll = previewContainer.scrollHeight - previewContainer.clientHeight
+  const maxEditorScroll = editorContainer.scrollHeight - editorContainer.clientHeight
   
   if (maxPreviewScroll > 0 && maxEditorScroll > 0) {
-    isSyncing.value = true;
-    const ratio = previewContainer.scrollTop / maxPreviewScroll;
-    editorContainer.scrollTop = ratio * maxEditorScroll;
-    setTimeout(() => { isSyncing.value = false; }, 50);
+    isSyncing.value = true
+    const ratio = previewContainer.scrollTop / maxPreviewScroll
+    editorContainer.scrollTop = ratio * maxEditorScroll
+    setTimeout(() => { isSyncing.value = false }, 50)
   }
-};
+}
 
 const handleCopy = () => {
     if (previewRef.value && previewRef.value.copyToClipboard) {
-        previewRef.value.copyToClipboard();
+        previewRef.value.copyToClipboard()
     }
-};
+}
 
 onMounted(() => {
-  window.addEventListener('editor-scroll', handleEditorScroll as EventListener);
+  window.addEventListener('editor-scroll', handleEditorScroll)
   
   // 延迟绑定预览区滚动事件
   setTimeout(() => {
     if (previewRef.value?.previewScrollContainer) {
-      previewRef.value.previewScrollContainer.addEventListener('scroll', handlePreviewScroll);
+      previewRef.value.previewScrollContainer.addEventListener('scroll', handlePreviewScroll)
     }
-  }, 200);
-});
+  }, 200)
+})
 
 onUnmounted(() => {
-  window.removeEventListener('editor-scroll', handleEditorScroll as EventListener);
+  window.removeEventListener('editor-scroll', handleEditorScroll)
   if (previewRef.value?.previewScrollContainer) {
-    previewRef.value.previewScrollContainer.removeEventListener('scroll', handlePreviewScroll);
+    previewRef.value.previewScrollContainer.removeEventListener('scroll', handlePreviewScroll)
   }
-});
+})
 </script>
 
 <template>

@@ -1,12 +1,16 @@
-import { ref, watch, onMounted, computed } from 'vue'
-import { 
-  themes, themeKeys, 
-  fonts, fontKeys, 
-  codeBlockStyles, codeBlockStyleKeys,
-  headingStyles, headingStyleKeys,
-  generateBaseStyles 
+import { computed, onMounted, ref, watch } from 'vue'
+import {
+    codeBlockStyleKeys,
+    codeBlockStyles,
+    fontKeys,
+    fonts,
+    generateBaseStyles,
+    headingStyleKeys,
+    headingStyles,
+    themeKeys,
+    themes
 } from '../config'
-import { defaultDemo } from '../demos'
+import { defaultDemo } from '../presets'
 
 const STORAGE_KEY_CONTENT = 'wechat-md-content'
 const STORAGE_KEY_AUTOSAVE = 'wechat-md-autosave'
@@ -153,4 +157,4 @@ export function useEditorState() {
 }
 
 // 导出配置供其他模块直接访问
-export { themes, themeKeys, fonts, fontKeys, codeBlockStyles, codeBlockStyleKeys, headingStyles, headingStyleKeys }
+export { codeBlockStyleKeys, codeBlockStyles, fontKeys, fonts, headingStyleKeys, headingStyles, themeKeys, themes }

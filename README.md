@@ -1,35 +1,104 @@
 # WeChat Markdown Editor
 
-一个强大的 Markdown 编辑器，专为微信公众号设计。支持实时预览、代码高亮、Mermaid 图表以及多种主题切换。
+一个优雅的微信公众号 Markdown 编辑器，支持实时预览和样式自定义。
 
-## 主要特性
+## 项目结构
 
-- **Markdown 实时预览**: 左侧编辑，右侧实时预览微信公众号样式的渲染效果。
-- **主题切换**: 内置绿色、橙色、紫色等多套主题，支持自定义字体和字号。
-- **代码高亮**: 支持多种编程语言的代码高亮，并提供 macOS 风格代码块。
-- **Mermaid 图表**: 原生支持 Mermaid 流程图、时序图等，渲染为 SVG 格式，完美兼容微信公众号。
-- **自动保存**: 编辑内容自动保存到本地，防止意外丢失。
-- **一键复制**: 渲染后的内容已内联样式，点击复制即可直接粘贴到微信公众号后台。
-
-## 使用方法
-
-1.  **编写**: 在左侧编辑器中输入 Markdown 内容。
-2.  **设置**: 顶部工具栏可调整主题、字体、字号和代码风格。
-3.  **预览**: 右侧手机模拟框中实时查看渲染效果。
-4.  **复制**: 点击顶部的“复制”按钮。
-5.  **粘贴**: 打开微信公众号图文编辑器，直接粘贴即可。
+```
+wechat-md/
+├── .editorconfig              # 编辑器统一配置
+├── .eslintrc.cjs              # ESLint 配置
+├── .prettierrc                # Prettier 配置
+├── .gitignore                 # Git 忽略规则
+├── index.html                 # HTML 入口
+├── package.json               # 项目依赖配置
+├── vite.config.js             # Vite 构建配置
+├── yarn.lock                  # Yarn 依赖锁定
+│
+├── public/                    # 静态资源
+│   ├── favicon.ico
+│   └── favicon.png
+│
+└── src/
+    ├── main.js                # 应用入口
+    ├── App.vue                # 根组件
+    ├── style.css              # 全局样式
+    │
+    ├── components/            # Vue 组件
+    │   ├── editor/            # 编辑器相关组件
+    │   │   └── MarkdownEditor.vue
+    │   ├── layout/            # 布局组件
+    │   │   └── AppHeader.vue
+    │   ├── preview/           # 预览相关组件
+    │   │   └── WeChatPreview.vue
+    │   └── ui/                # UI 组件
+    │       └── NotificationToast.vue
+    │
+    ├── composables/           # Vue 3 Composition API
+    │   ├── useEditorState.js
+    │   ├── useMarkdownRenderer.js
+    │   └── useNotification.js
+    │
+    ├── config/                # 配置模块
+    │   ├── index.js
+    │   ├── baseStyles.js
+    │   ├── codeBlockStyles.js
+    │   ├── fonts.js
+    │   ├── headingStyles.js
+    │   └── themes.js
+    │
+    ├── presets/               # 预设模板
+    │   └── index.js
+    │
+    └── utils/                 # 工具函数
+        ├── inlineStyles.js
+        └── markdownItPlugins.js
+```
 
 ## 技术栈
 
-- Vue 3
-- Vite
-- TypeScript
-- TailwindICSS
-- Markdown-it
-- Highlight.js
-- Mermaid
-- CodeMirror
+- **Vue 3** - 渐进式 JavaScript 框架
+- **Vite** - 下一代前端构建工具
+- **Tailwind CSS** - 实用优先的 CSS 框架
+- **CodeMirror 6** - 代码编辑器
+- **markdown-it** - Markdown 解析器
+- **Mermaid** - 图表渲染
 
-## 许可证
+## 开发
 
-MIT License
+```bash
+# 安装依赖
+yarn install
+
+# 启动开发服务器
+yarn dev
+
+# 代码检查
+yarn lint
+
+# 代码格式化
+yarn format
+
+# 构建生产版本
+yarn build
+
+# 预览生产构建
+yarn preview
+```
+
+## 功能特性
+
+- ✅ 实时 Markdown 预览
+- ✅ 微信公众号样式适配
+- ✅ 多主题切换
+- ✅ 自定义字体
+- ✅ 代码高亮
+- ✅ 图表支持（Mermaid）
+- ✅ 同步滚动
+- ✅ 一键复制
+- ✅ 暗色模式
+- ✅ 本地自动保存
+
+## License
+
+MIT
