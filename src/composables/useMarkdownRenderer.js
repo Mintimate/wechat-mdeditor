@@ -9,7 +9,7 @@ import mermaid from 'mermaid'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
 import { inlineStyles } from '../utils/inlineStyles'
-import { imageUnwrapPlugin, forceTightListPlugin, rubyPlugin } from '../utils/markdown-it-plugins'
+import { imageUnwrapPlugin, forceTightListPlugin, rubyPlugin, swipeImagesPlugin } from '../utils/markdown-it-plugins'
 import { fonts, codeBlockStyles } from '../config'
 
 // 内联 SVG 元素样式（必须在 DOM 中才能获取计算样式）
@@ -47,6 +47,7 @@ export function useMarkdownRenderer() {
   md.use(imageUnwrapPlugin)
   md.use(forceTightListPlugin)
   md.use(rubyPlugin)
+  md.use(swipeImagesPlugin)
   md.use(markdownItIns)
   md.use(markdownItMark)
   md.use(markdownItSub)
