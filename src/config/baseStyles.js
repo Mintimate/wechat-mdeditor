@@ -13,9 +13,9 @@
  */
 export const generateBaseStyles = ({ font, size, primary, secondary }) => {
   const tableStyle = `
-    table { border-collapse: collapse; margin: 10px 0; width: 100%; display: table; font-size: 14px; }
-    th { background-color: #f2f2f2; font-weight: bold; border: 1px solid #ddd; padding: 8px; text-align: left; min-width: 60px; }
-    td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    table { border-collapse: collapse; margin: 0; width: 100%; display: table; font-size: 14px; min-width: max-content; }
+    th { background-color: #f2f2f2; font-weight: bold; border: 1px solid #ddd; padding: 8px; text-align: left; min-width: 60px; white-space: nowrap; }
+    td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; }
     tr:nth-child(even) { background-color: #f9f9f9; }
   `
 

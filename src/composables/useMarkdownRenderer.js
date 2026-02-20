@@ -87,6 +87,15 @@ export function useMarkdownRenderer() {
     return '</li>'
   }
 
+  // 表格渲染：包裹在可横向滚动的容器中
+  md.renderer.rules.table_open = () => {
+    return '<section style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0;"><table style="border-collapse: collapse; width: 100%; display: table; font-size: 14px; min-width: max-content;">'
+  }
+
+  md.renderer.rules.table_close = () => {
+    return '</table></section>'
+  }
+
   const defaultFence = md.renderer.rules.fence
   md.renderer.rules.fence = (tokens, idx, options, env, self) => {
     const token = tokens[idx]
