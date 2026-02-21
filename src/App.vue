@@ -4,6 +4,9 @@ import MarkdownEditor from './components/editor/MarkdownEditor.vue'
 import AppHeader from './components/layout/AppHeader.vue'
 import WeChatPreview from './components/preview/WeChatPreview.vue'
 import NotificationToast from './components/ui/NotificationToast.vue'
+import { useEditorState } from './composables/useEditorState'
+
+const { fancyMode } = useEditorState()
 
 const editorRef = ref(null)
 const previewRef = ref(null)
@@ -78,7 +81,7 @@ onUnmounted(() => {
         <MarkdownEditor ref="editorRef" />
       </div>
       <!-- 同步滚动开关 -->
-      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-3">
         <button
           @click="syncScrollEnabled = !syncScrollEnabled"
           :class="[
@@ -92,6 +95,24 @@ onUnmounted(() => {
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path v-if="syncScrollEnabled" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" stroke-linecap="round" stroke-linejoin="round"/>
             <path v-else d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <!-- 格子背景开关 -->
+        <button
+          @click="fancyMode = !fancyMode"
+          :class="[
+            'w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200',
+            fancyMode 
+              ? 'bg-blue-500 text-white hover:bg-blue-600' 
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
+          ]"
+          :title="fancyMode ? '关闭格子背景' : '开启格子背景'"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="8" height="8" rx="1" :fill="fancyMode ? 'currentColor' : 'none'"/>
+            <rect x="13" y="3" width="8" height="8" rx="1" :fill="fancyMode ? 'none' : 'currentColor'"/>
+            <rect x="3" y="13" width="8" height="8" rx="1" :fill="fancyMode ? 'none' : 'currentColor'"/>
+            <rect x="13" y="13" width="8" height="8" rx="1" :fill="fancyMode ? 'currentColor' : 'none'"/>
           </svg>
         </button>
       </div>

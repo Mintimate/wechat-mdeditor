@@ -110,8 +110,9 @@ export function useMarkdownRenderer() {
   }
 
   const render = async (opts) => {
-    const { input, codeBlockStyle, imageCaptionMode, currentFont, wechatStyle, themeTertiary } = opts
+    const { input, codeBlockStyle, imageCaptionMode, currentFont, wechatStyle, themeTertiary, fancyMode, themePrimary } = opts
     const tertiaryColor = themeTertiary || '#ea7c4d'
+    const primaryColor = themePrimary || '#f97316'
 
     md.set({
       highlight: function (str, lang) {
@@ -229,8 +230,33 @@ export function useMarkdownRenderer() {
     const combinedCss = wechatStyle
 
     const styledHtml = inlineStyles(rawHtml, combinedCss)
+    
+    // Fancy 模式格子背景样式
+    let fancyBgStyle = ''
+    if (fancyMode && primaryColor) {
+      // 将十六进制颜色转换为 rgba
+      const hexToRgba = (hex, alpha) => {
+        const r = parseInt(hex.slice(1, 3), 16)
+        const g = parseInt(hex.slice(3, 5), 16)
+        const b = parseInt(hex.slice(5, 7), 16)
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`
+      }
+      
+      // 使用淡灰色格子（类似掘金风格），但带一点点主题色调
+      const gridColor = hexToRgba(primaryColor, 0.06)
+      const gridAccent = hexToRgba(primaryColor, 0.03)
+      
+      fancyBgStyle = `
+        background-image: linear-gradient(0deg, transparent 24%, ${gridColor} 25%, ${gridAccent} 26%, transparent 27%, transparent 74%, ${gridColor} 75%, ${gridAccent} 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, ${gridColor} 25%, ${gridAccent} 26%, transparent 27%, transparent 74%, ${gridColor} 75%, ${gridAccent} 76%, transparent 77%, transparent);
+        background-size: 50px 50px;
+        background-color: #ffffff;
+        padding-bottom: 30px;
+      `
+    }
+    
     // 用 section 包裹内容，符合微信公众号编辑器规范
-    const baseHtml = `<section style="font-family: ${fonts[currentFont]?.value || 'sans-serif'}; font-size: 16px; line-height: 1.75; color: #3f3f3f;">${styledHtml}</section>`
+    const paddingStyle = 'padding: 0;'
+    const baseHtml = `<section style="font-family: ${fonts[currentFont]?.value || 'sans-serif'}; font-size: 16px; line-height: 1.75; color: #3f3f3f; ${paddingStyle} ${fancyBgStyle}">${styledHtml}</section>`
     outputHtml.value = baseHtml
 
     await nextTick()
@@ -285,7 +311,7 @@ export function useMarkdownRenderer() {
                 svgEl.style.height = 'auto'
                 svgEl.style.display = 'block'
                 svgEl.style.margin = '0 auto'
-                svgEl.style.backgroundColor = '#ffffff'
+                svgEl.style.backgroundColor = 'transparent'
                 
                 // 内联 SVG 中所有元素的样式（关键：必须在 DOM 中才能获取计算样式）
                 inlineSvgElementStyles(svgEl)

@@ -15,6 +15,7 @@ import { defaultDemo } from '../presets'
 const STORAGE_KEY_CONTENT = 'wechat-md-content'
 const STORAGE_KEY_AUTOSAVE = 'wechat-md-autosave'
 const STORAGE_KEY_DARK_MODE = 'wechat-md-dark-mode'
+const STORAGE_KEY_FANCY_MODE = 'wechat-md-fancy-mode'
 
 const input = ref(defaultDemo)
 
@@ -25,6 +26,9 @@ const codeBlockStyle = ref('default')
 const headingStyle = ref('classic')
 const autoSave = ref(true)
 const imageCaptionMode = ref('title-priority')
+
+// Fancy 模式（格子背景）
+const fancyMode = ref(false)
 
 // 暗色模式状态: 'light' | 'system' | 'dark'
 const darkMode = ref('system')
@@ -75,8 +79,17 @@ export function useEditorState() {
     const headingStyleConfig = headingStyles[headingStyle.value]
     const headingStyleCss = headingStyleConfig ? headingStyleConfig.generate(theme.primary, font, size) : ''
 
-    // 基础样式
-    const baseStyle = generateBaseStyles({ font, size, primary: theme.primary, tertiary: theme.tertiary, secondary: theme.secondary })
+    // 基础样式，支持 Fancy 主题的额外配置
+    const baseStyle = generateBaseStyles({ 
+      font, 
+      size, 
+      primary: theme.primary, 
+      tertiary: theme.tertiary, 
+      secondary: theme.secondary,
+      gridColor: theme.gridColor,
+      gridAccent: theme.gridAccent,
+      lightColor: theme.lightColor,
+    })
 
     return `
     ${headingStyleCss}
@@ -114,6 +127,11 @@ export function useEditorState() {
     applyDarkMode()
   })
 
+  // 监听 Fancy 模式变化
+  watch(fancyMode, (newVal) => {
+    localStorage.setItem(STORAGE_KEY_FANCY_MODE, String(newVal))
+  })
+
   onMounted(() => {
     const savedAutoSave = localStorage.getItem(STORAGE_KEY_AUTOSAVE)
     if (savedAutoSave !== null) {
@@ -132,6 +150,12 @@ export function useEditorState() {
     }
     setupSystemListener()
     applyDarkMode()
+
+    // 初始化 Fancy 模式
+    const savedFancyMode = localStorage.getItem(STORAGE_KEY_FANCY_MODE)
+    if (savedFancyMode !== null) {
+      fancyMode.value = savedFancyMode === 'true'
+    }
   })
 
   return {
@@ -145,6 +169,7 @@ export function useEditorState() {
     imageCaptionMode,
     darkMode,
     isDark,
+    fancyMode,
     wechatStyle,
     // 配置导出
     themeColors,
