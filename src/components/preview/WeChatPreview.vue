@@ -2,7 +2,8 @@
 import { ref, watch, onMounted } from 'vue';
 import { useEditorState } from '../../composables/useEditorState';
 import { useMarkdownRenderer } from '../../composables/useMarkdownRenderer';
-import { useNotification } from '../../composables/useNotification';
+import { useDynamicIsland } from '../../composables/useDynamicIsland';
+import DynamicIslandNotification from './DynamicIslandNotification.vue';
 
 const { 
   input, 
@@ -18,7 +19,7 @@ const {
 } = useEditorState();
 
 const { outputHtml, previewContainer, render } = useMarkdownRenderer();
-const { success, error } = useNotification();
+const { success } = useDynamicIsland();
 
 const previewScrollContainer = ref<HTMLElement | null>(null);
 
@@ -66,7 +67,7 @@ const copyToClipboard = async () => {
     });
     
     await navigator.clipboard.write([clipboardItem]);
-    success('已复制到剪贴板！请直接在微信公众号编辑器中粘贴');
+    success('复制成功 (˘❥˘) ♥️');
   } catch (err) {
     console.error('复制失败', err);
     // 降级方案：使用 execCommand
@@ -82,10 +83,10 @@ const copyToClipboard = async () => {
         document.execCommand('copy');
         selection.removeAllRanges();
         
-        success('已复制到剪贴板！请直接在微信公众号编辑器中粘贴');
+        success('复制成功');
       }
     } catch (e) {
-      error('复制失败，请尝试手动全选复制');
+      // 复制失败，静默处理
     }
   }
 };
@@ -160,8 +161,8 @@ defineExpose({
             </div>
           </div>
 
-          <!-- Dynamic Island -->
-          <div class="absolute top-[10px] left-1/2 -translate-x-1/2 w-[126px] h-[37px] bg-black rounded-[24px] z-40 shadow-lg"></div>
+          <!-- Dynamic Island Notification -->
+          <DynamicIslandNotification />
 
           <!-- ===== WECHAT NAVIGATION BAR ===== -->
           <div class="absolute top-[52px] left-0 right-0 h-[44px] z-20 flex items-center justify-between px-4 bg-[#ededed] border-b border-black/[0.08]">

@@ -1,3 +1,7 @@
+/**
+ * @deprecated 此通知模块已弃用，请使用 useDynamicIsland.js
+ * 新的灵动岛通知组件支持 success/error/info/warning 多种类型
+ */
 import { ref, readonly } from 'vue';
 
 const notifications = ref([]);
