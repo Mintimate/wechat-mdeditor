@@ -1,3 +1,4 @@
+
 import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
 import markdownItIns from 'markdown-it-ins'
@@ -11,28 +12,71 @@ import { codeBlockStyles, fonts } from '../config'
 import { inlineStyles } from '../utils/inlineStyles'
 import { forceTightListPlugin, imageUnwrapPlugin, rubyPlugin, swipeImagesPlugin } from '../utils/markdown-it-plugins'
 
-// 内联 SVG 元素样式（必须在 DOM 中才能获取计算样式）
+// inline computed styles for SVG elements (used before rasterizing)
 function inlineSvgElementStyles(svgEl) {
-  // SVG 样式属性列表
   const svgProperties = [
     'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'stroke-linejoin',
     'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor',
     'dominant-baseline', 'alignment-baseline', 'opacity', 'fill-opacity', 'stroke-opacity',
     'marker-start', 'marker-mid', 'marker-end', 'marker'
   ]
-  
-  // 遍历 SVG 中的所有元素
   const allElements = svgEl.querySelectorAll('*')
   allElements.forEach(el => {
     if (!(el instanceof SVGElement)) return
     const computed = window.getComputedStyle(el)
     svgProperties.forEach(prop => {
       const val = computed.getPropertyValue(prop)
-      // 只内联有实际值的属性
       if (val && val !== 'none' && val !== 'auto' && val !== 'inherit' && val !== '') {
         el.style.setProperty(prop, val)
       }
     })
+  })
+}
+
+// 将 SVG 转换为 Base64 图片
+async function svgToImage(svgEl) {
+  let outputWidth = 800, outputHeight = 600
+  const vb = svgEl.getAttribute('viewBox')
+  if (vb) {
+    const parts = vb.trim().split(/[\s,]+/).map(parseFloat)
+    if (parts.length === 4) {
+      outputWidth = parts[2]
+      outputHeight = parts[3]
+    }
+  }
+  const attrWidth = svgEl.getAttribute('width')
+  const attrHeight = svgEl.getAttribute('height')
+  if (attrWidth && attrWidth.endsWith('px')) outputWidth = parseFloat(attrWidth)
+  if (attrHeight && attrHeight.endsWith('px')) outputHeight = parseFloat(attrHeight)
+
+  const maxRenderWidth = Math.min(outputWidth, 2000)
+  const scale = 2
+  const canvas = document.createElement('canvas')
+  canvas.width = maxRenderWidth * scale
+  canvas.height = outputHeight * scale
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.scale(scale, scale)
+
+  const svgData = new XMLSerializer().serializeToString(svgEl)
+  const img = new Image()
+  const svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData)
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      try {
+        ctx.drawImage(img, 0, 0, maxRenderWidth, outputHeight)
+        resolve(canvas.toDataURL('image/png'))
+      } catch (err) {
+        console.error('Canvas drawImage error', err)
+        reject(err)
+      }
+    }
+    img.onerror = e => {
+      console.error('SVG Image loading failed', e)
+      reject(new Error('SVG Image loading failed'))
+    }
+    img.src = svgUrl
   })
 }
 
@@ -334,24 +378,11 @@ export function useMarkdownRenderer() {
     if (typeof document !== 'undefined') {
       const mermaidDivs = styledHtml.match(/class="mermaid"/g)
       if (mermaidDivs && mermaidDivs.length > 0) {
+
         try {
-          mermaid.initialize({ 
-            startOnLoad: false, 
-            theme: 'default',
-            fontSize: 14, 
-            securityLevel: 'loose',
-            flowchart: { curve: 'basis' },
-            themeVariables: {
-              primaryColor: '#E8F4FD',
-              primaryTextColor: '#333',
-              primaryBorderColor: '#4A90D9',
-              lineColor: '#4A90D9',
-              secondaryColor: '#F5F5F5',
-              tertiaryColor: '#FFF'
-            }
-          })
+          mermaid.initialize({ startOnLoad: false, theme: 'default' })
         } catch (e) {
-          console.warn('Mermaid re-initialization warning:', e)
+          console.warn('Mermaid init warning:', e)
         }
 
         // 创建一个隐藏的临时容器，插入到 DOM 中以便 getComputedStyle 能工作
@@ -360,7 +391,7 @@ export function useMarkdownRenderer() {
         tmpDiv.style.left = '-9999px'
         tmpDiv.style.top = '-9999px'
         tmpDiv.style.width = '800px'
-        tmpDiv.style.visibility = 'hidden'
+        tmpDiv.style.zIndex = '-1' 
         tmpDiv.innerHTML = baseHtml
         document.body.appendChild(tmpDiv)
         
@@ -382,6 +413,10 @@ export function useMarkdownRenderer() {
                 svgEl.style.margin = '0 auto'
                 svgEl.style.backgroundColor = 'transparent'
                 
+                // 内联 styles 之前不需要修改 innerHTML 进行颜色替换，因为内联后会失效或者冲突，
+                // 应该依赖 inlineSvgElementStyles 或者 mermaid config。
+                // 不过 doocs/md 是内联后改的？查看 history... 
+                
                 // 内联 SVG 中所有元素的样式（关键：必须在 DOM 中才能获取计算样式）
                 inlineSvgElementStyles(svgEl)
                 
@@ -390,7 +425,41 @@ export function useMarkdownRenderer() {
                 textElements.forEach(textEl => {
                   textEl.style.fontFamily = fonts[currentFont]?.value || 'sans-serif'
                 })
+
+                // 修复 mermaid 部分文本颜色被 stroke 覆盖的问题
+                svgEl.innerHTML = svgEl.innerHTML.replace(
+                  /<tspan([^>]*)>/g,
+                  `<tspan$1 style="fill: #333 !important; color: #333 !important; stroke: none !important;">`
+                )
                 
+                // 优化时序图 actor（端点）对比度：设置更明显的背景色和深色标签
+                try {
+                  const actorRects = svgEl.querySelectorAll('rect.actor, rect[class*="actor-"]')
+                  actorRects.forEach(rect => {
+                    // 使用浅灰背景以保证与文本形成对比
+                    if (!rect.getAttribute('data-actor-adjusted')) {
+                      rect.style.fill = '#f6f7fa'
+                      rect.style.stroke = rect.style.stroke || 'rgba(0,0,0,0.12)'
+                      rect.setAttribute('data-actor-adjusted', '1')
+                    }
+                  })
+
+                  // 将 actor 文本设为深色，并移除描边
+                  const actorTexts = svgEl.querySelectorAll('text.actor, text[class*="actor-"]')
+                  actorTexts.forEach(textEl => {
+                    const tspans = textEl.querySelectorAll('tspan')
+                    tspans.forEach(tspan => {
+                      tspan.style.fill = '#111'
+                      tspan.style.color = '#111'
+                      tspan.style.stroke = 'none'
+                    })
+                    // 同步 text 元素自身的填充
+                    textEl.style.fill = defaultThemeVariables?.primaryTextColor || '#111'
+                  })
+                } catch (e) {
+                  console.warn('actor contrast adjust failed', e)
+                }
+
                 // 处理 foreignObject 内的内容，简化 HTML 结构
                 const foreignObjects = svgEl.querySelectorAll('foreignObject')
                 foreignObjects.forEach(fo => {
@@ -435,11 +504,20 @@ export function useMarkdownRenderer() {
                   }
                 }
                 
+                // 转换为图片
+                const dataUrl = await svgToImage(svgEl)
+                const img = document.createElement('img')
+                img.src = dataUrl
+                img.style.maxWidth = '100%'
+                img.style.height = 'auto'
+                img.style.display = 'block'
+                img.style.margin = '0 auto'
+
                 // 创建新的 section 包裹 SVG
                 const newSection = document.createElement('section')
                 newSection.style.textAlign = 'center'
                 newSection.style.margin = '1em auto'
-                newSection.innerHTML = svgEl.outerHTML
+                newSection.appendChild(img)
                 div.replaceWith(newSection)
               }
             } catch (e) {
