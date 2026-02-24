@@ -31,6 +31,7 @@ pnpm-debug.log*
 # Cache
 .cache/
 .parcel-cache/
+.edgeone/
 
 # Test coverage
 coverage/
