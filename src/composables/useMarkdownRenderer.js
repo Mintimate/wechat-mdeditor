@@ -1,16 +1,15 @@
-import { ref, nextTick } from 'vue'
+import hljs from 'highlight.js'
 import MarkdownIt from 'markdown-it'
-import markdownItTaskLists from 'markdown-it-task-lists'
 import markdownItIns from 'markdown-it-ins'
 import markdownItMark from 'markdown-it-mark'
 import markdownItSub from 'markdown-it-sub'
 import markdownItSup from 'markdown-it-sup'
+import markdownItTaskLists from 'markdown-it-task-lists'
 import mermaid from 'mermaid'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
+import { nextTick, ref } from 'vue'
+import { codeBlockStyles, fonts } from '../config'
 import { inlineStyles } from '../utils/inlineStyles'
-import { imageUnwrapPlugin, forceTightListPlugin, rubyPlugin, swipeImagesPlugin } from '../utils/markdown-it-plugins'
-import { fonts, codeBlockStyles } from '../config'
+import { forceTightListPlugin, imageUnwrapPlugin, rubyPlugin, swipeImagesPlugin } from '../utils/markdown-it-plugins'
 
 // 内联 SVG 元素样式（必须在 DOM 中才能获取计算样式）
 function inlineSvgElementStyles(svgEl) {
@@ -109,6 +108,73 @@ export function useMarkdownRenderer() {
     return defaultFence ? defaultFence(tokens, idx, options, env, self) : ''
   }
 
+  // highlight.js 颜色映射（基于 github-light 主题）
+  const hljsColors = {
+    'comment': { color: '#6a737d', fontStyle: 'italic' },
+    'quote': { color: '#6a737d', fontStyle: 'italic' },
+    'keyword': { color: '#d73a49' },
+    'selector-tag': { color: '#d73a49' },
+    'subst': { color: '#24292e' },
+    'number': { color: '#005cc5' },
+    'literal': { color: '#005cc5' },
+    'variable': { color: '#e36209' },
+    'template-variable': { color: '#e36209' },
+    'tag': { color: '#22863a' },
+    'name': { color: '#22863a' },
+    'selector-id': { color: '#f97583' },
+    'selector-class': { color: '#f97583' },
+    'regexp': { color: '#032f62' },
+    'deletion': { color: '#b31d28', backgroundColor: '#ffeef0' },
+    'addition': { color: '#22863a', backgroundColor: '#f0fff4' },
+    'built_in': { color: '#e36209' },
+    'builtin-name': { color: '#e36209' },
+    'type': { color: '#6f42c1' },
+    'class': { color: '#6f42c1' },
+    'function': { color: '#6f42c1' },
+    'params': { color: '#24292e' },
+    'property': { color: '#005cc5' },
+    'attribute': { color: '#e36209' },
+    'punctuation': { color: '#24292e' },
+    'string': { color: '#032f62' },
+    'symbol': { color: '#e36209' },
+    'bullet': { color: '#005cc5' },
+    'link': { color: '#032f62', textDecoration: 'underline' },
+    'meta': { color: '#6a737d' },
+    'meta-keyword': { color: '#d73a49' },
+    'meta-string': { color: '#032f62' },
+    'emphasis': { fontStyle: 'italic' },
+    'strong': { fontWeight: 'bold' },
+    'title': { color: '#22863a' },
+    'section': { color: '#22863a' }
+  }
+
+  // 内联代码高亮样式
+  function inlineHighlightStyles(html) {
+    // 匹配带有 hljs class 的 span 标签
+    return html.replace(/<span class="hljs-([a-z0-9-]+)"([^>]*)>/gi, (match, className, rest) => {
+      const styles = []
+      const colorInfo = hljsColors[className]
+      if (colorInfo) {
+        if (colorInfo.color) {
+          styles.push(`color:${colorInfo.color}`)
+        }
+        if (colorInfo.fontStyle) {
+          if (colorInfo.fontStyle === 'italic') {
+            styles.push('font-style:italic')
+          } else if (colorInfo.fontStyle === 'bold') {
+            styles.push('font-weight:bold')
+          }
+        }
+        if (colorInfo.backgroundColor) {
+          styles.push(`background-color:${colorInfo.backgroundColor}`)
+        }
+      }
+      return styles.length > 0 
+        ? `<span class="hljs-${className}" style="${styles.join(';')}">` 
+        : `<span class="hljs-${className}"${rest}>`
+    })
+  }
+
   const render = async (opts) => {
     const { input, codeBlockStyle, imageCaptionMode, currentFont, wechatStyle, themeTertiary, fancyMode, themePrimary } = opts
     const tertiaryColor = themeTertiary || '#ea7c4d'
@@ -126,6 +192,9 @@ export function useMarkdownRenderer() {
         } else {
           content = md.utils.escapeHtml(str)
         }
+
+        // 内联高亮样式
+        content = inlineHighlightStyles(content)
 
         // 使用配置中的代码块样式
         const styleConfig = codeBlockStyles[codeBlockStyle]
