@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import MarkdownEditor from './components/editor/MarkdownEditor.vue'
 import AppHeader from './components/layout/AppHeader.vue'
 import WeChatPreview from './components/preview/WeChatPreview.vue'
+import MobileWarningOverlay from './components/ui/MobileWarningOverlay.vue'
 import NotificationToast from './components/ui/NotificationToast.vue'
 import { useEditorState } from './composables/useEditorState'
 
@@ -121,6 +122,7 @@ onUnmounted(() => {
       </div>
     </main>
     <NotificationToast />
+    <MobileWarningOverlay />
   </div>
 </template>
 
