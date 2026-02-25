@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useDynamicIsland } from '../../composables/useDynamicIsland';
 import { useEditorState } from '../../composables/useEditorState';
 import { useMarkdownRenderer } from '../../composables/useMarkdownRenderer';
-import { useDynamicIsland } from '../../composables/useDynamicIsland';
 import DynamicIslandNotification from './DynamicIslandNotification.vue';
 
 const { 
@@ -22,6 +22,23 @@ const { outputHtml, previewContainer, render } = useMarkdownRenderer();
 const { success } = useDynamicIsland();
 
 const previewScrollContainer = ref<HTMLElement | null>(null);
+
+// 缩放控制
+const phoneScale = ref(1);
+const MIN_SCALE = 0.6;
+const MAX_SCALE = 1.5;
+
+const resetScale = () => {
+  phoneScale.value = 1;
+};
+
+// 将 scale 映射到滑块百分比 (0~100)
+const sliderValue = computed({
+  get: () => Math.round(((phoneScale.value - MIN_SCALE) / (MAX_SCALE - MIN_SCALE)) * 100),
+  set: (val: number) => {
+    phoneScale.value = parseFloat((MIN_SCALE + (val / 100) * (MAX_SCALE - MIN_SCALE)).toFixed(2));
+  }
+});
 
 // Watch for changes and re-render
 watch([input, currentTheme, currentFont, currentSize, codeBlockStyle, headingStyle, imageCaptionMode, fancyMode], () => {
@@ -99,7 +116,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800">
+  <div class="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 relative">
     <!-- Top label bar -->
     <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-b border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-500 font-medium flex justify-between items-center shadow-sm z-10 shrink-0">
       <span class="flex items-center gap-2">
@@ -109,12 +126,17 @@ defineExpose({
       <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-400">支持 Mermaid, 样式已内联</span>
     </div>
 
-    <!-- Phone Simulator Container -->
-    <div class="flex-1 overflow-y-auto py-10 px-4 flex justify-center bg-gradient-to-b from-gray-200/60 to-gray-300/60 dark:from-gray-900 dark:to-black">
-
-      <!-- Outer wrapper for phone body + physical side buttons -->
-      <div class="relative shrink-0" style="width: 375px; height: 812px;">
-
+    <!-- Phone Simulator Container - 完全居中布局 -->
+    <div class="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-200/60 to-gray-300/60 dark:from-gray-900 dark:to-black relative overflow-hidden px-4">
+      <!-- Phone Body with scale transformation -->
+      <div 
+        class="relative shrink-0 transition-transform duration-300 ease-out origin-center"
+        :style="{ 
+          width: '375px', 
+          height: '812px',
+          transform: `scale(${phoneScale})`
+        }"
+      >
         <!-- Side buttons LEFT: mute switch -->
         <div class="absolute -left-[4px] top-[112px] w-[4px] h-7 bg-gray-700 dark:bg-gray-500 rounded-l-[3px] shadow-inner"></div>
         <!-- volume up -->
@@ -233,6 +255,48 @@ defineExpose({
 
         </div><!-- /phone body -->
       </div><!-- /outer wrapper -->
+
+      <!-- Scale Controls - 右侧悬浮滑块 -->
+      <div class="scale-panel absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl px-3 py-4 shadow-xl border border-white/60 dark:border-gray-700/60 z-20 select-none">
+        <!-- 放大图标 -->
+        <div class="text-gray-400 dark:text-gray-500">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+        </div>
+
+        <!-- 竖向滑块轨道 -->
+        <div class="relative flex flex-col items-center" style="height: 120px;">
+          <input
+            v-model.number="sliderValue"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            class="scale-slider"
+            title="拖动调整缩放"
+          />
+          <!-- 轨道填充指示 -->
+        </div>
+
+        <!-- 缩小图标 -->
+        <div class="text-gray-400 dark:text-gray-500">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+        </div>
+
+        <!-- 百分比显示 + 重置 -->
+        <button
+          @click="resetScale"
+          class="scale-badge"
+          title="点击重置为 100%"
+        >
+          {{ Math.round(phoneScale * 100) }}<span class="text-[9px] opacity-70">%</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -244,6 +308,126 @@ defineExpose({
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* ===== 缩放面板 ===== */
+.scale-panel {
+  min-width: 44px;
+}
+
+/* 竖向滑块 */
+.scale-slider {
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 4px;
+  height: 120px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* WebKit 轨道 */
+.scale-slider::-webkit-slider-runnable-track {
+  width: 4px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom, #e5e7eb, #e5e7eb);
+}
+
+/* WebKit 滑块 thumb */
+.scale-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45), 0 0 0 0 rgba(99, 102, 241, 0);
+  cursor: grab;
+  transition: box-shadow 0.2s, transform 0.15s;
+  margin-left: -7px;
+}
+
+.scale-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.6), 0 0 0 5px rgba(99, 102, 241, 0.12);
+  transform: scale(1.15);
+}
+
+.scale-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.25);
+  box-shadow: 0 2px 16px rgba(99, 102, 241, 0.7), 0 0 0 8px rgba(99, 102, 241, 0.15);
+}
+
+/* Firefox 轨道 */
+.scale-slider::-moz-range-track {
+  width: 4px;
+  border-radius: 99px;
+  background: #e5e7eb;
+}
+
+/* Firefox thumb */
+.scale-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45);
+  cursor: grab;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.scale-slider::-moz-range-thumb:hover {
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.6);
+  transform: scale(1.15);
+}
+
+/* 暗色模式轨道 */
+.dark .scale-slider::-webkit-slider-runnable-track {
+  background: #374151;
+}
+.dark .scale-slider::-moz-range-track {
+  background: #374151;
+}
+
+/* 百分比徽章 / 重置按钮 */
+.scale-badge {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6366f1;
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.1));
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 10px;
+  padding: 4px 6px;
+  min-width: 38px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.scale-badge:hover {
+  background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(59,130,246,0.2));
+  border-color: rgba(99,102,241,0.4);
+  transform: scale(1.05);
+}
+
+.scale-badge:active {
+  transform: scale(0.95);
+}
+
+.dark .scale-badge {
+  color: #818cf8;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(59,130,246,0.15));
+  border-color: rgba(99,102,241,0.3);
 }
 </style>
 
