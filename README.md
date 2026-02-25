@@ -2,6 +2,12 @@
 
 一个优雅的微信公众号 Markdown 编辑器，支持实时预览和样式自定义。
 
+## 在线体验 🚀
+
+**立即体验在线演示：** [WeChat Markdown Editor](https://gsvshc.mintimate.cc/)
+
+通过在线演示可以直接体验编辑、主题切换与实时预览等功能。
+
 ## 项目结构
 
 ```
