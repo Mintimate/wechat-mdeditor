@@ -18,6 +18,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0; 
         border: 1px solid #e1e4e8;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; 
@@ -32,10 +34,12 @@ export const codeBlockStyles = {
         padding: 0; 
         color: #24292e; 
         font-size: 13px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #f6f8fa; padding: 10px; border-radius: 5px; overflow-x: auto; border: 1px solid #e1e4e8;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #24292e;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #f6f8fa; padding: 10px; border-radius: 5px; overflow-x: auto; border: 1px solid #e1e4e8; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #24292e; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   macos: {
@@ -49,6 +53,8 @@ export const codeBlockStyles = {
         overflow: hidden; 
         position: relative;
         padding: 15px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       pre::before {
         content: "• • •";
@@ -79,11 +85,13 @@ export const codeBlockStyles = {
         padding: 0; 
         color: #abb2bf; 
         font-size: 13px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => {
       const macHeader = `<div style="display: flex; gap: 6px; margin-bottom: 10px; align-items: center;"><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ff5f56; border: 1px solid #e0443e; display: inline-block;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ffbd2e; border: 1px solid #dea123; display: inline-block;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background-color: #27c93f; border: 1px solid #1aab29; display: inline-block;"></span></div>`
-      return `<pre class="hljs macos" style="background: #282c34; color: #abb2bf; padding: 15px; border-radius: 8px; overflow-x: auto;">${macHeader}<code style="font-family: ${font}; font-size: 13px; line-height: 1.5; background: transparent;">${content}</code></pre>`
+      return `<pre class="hljs macos" style="background: #282c34; color: #abb2bf; padding: 15px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;">${macHeader}<code style="font-family: ${font}; font-size: 13px; line-height: 1.5; background: transparent; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`
     },
   },
 
@@ -99,6 +107,8 @@ export const codeBlockStyles = {
         margin: 15px 0;
         border: 1px solid #e1e4e8;
         line-height: 1.45;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace; 
@@ -113,10 +123,12 @@ export const codeBlockStyles = {
         padding: 0; 
         color: #24292f;
         font-size: 12px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; border: 1px solid #e1e4e8;"><code style="font-family: ${font}; font-size: 12px; line-height: 1.45; color: #24292f;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; border: 1px solid #e1e4e8; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 12px; line-height: 1.45; color: #24292f; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   vscode: {
@@ -130,6 +142,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0;
         border: 1px solid #3c3c3c;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'Cascadia Code', 'Fira Code', Consolas, 'Courier New', monospace; 
@@ -145,10 +159,12 @@ export const codeBlockStyles = {
         color: #d4d4d4;
         font-size: 13px;
         line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #1e1e1e; padding: 16px; border-radius: 4px; overflow-x: auto; border: 1px solid #3c3c3c;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #d4d4d4;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #1e1e1e; padding: 16px; border-radius: 4px; overflow-x: auto; border: 1px solid #3c3c3c; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #d4d4d4; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   atom: {
@@ -163,6 +179,8 @@ export const codeBlockStyles = {
         margin: 15px 0;
         border: none;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'Fira Code', 'DejaVu Sans Mono', Consolas, monospace; 
@@ -178,10 +196,12 @@ export const codeBlockStyles = {
         color: #abb2bf;
         font-size: 13px;
         line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #282c34; padding: 16px; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);"><code style="font-family: ${font}; font-size: 13px; line-height: 1.6; color: #abb2bf;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #282c34; padding: 16px; border-radius: 8px; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15); white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.6; color: #abb2bf; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   oneDark: {
@@ -195,6 +215,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0;
         border: 1px solid #3e4451;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'JetBrains Mono', 'Fira Code', 'Droid Sans Mono', monospace; 
@@ -210,10 +232,12 @@ export const codeBlockStyles = {
         color: #abb2bf;
         font-size: 14px;
         line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #282c34; padding: 20px; border-radius: 10px; overflow-x: auto; border: 1px solid #3e4451;"><code style="font-family: ${font}; font-size: 14px; line-height: 1.6; color: #abb2bf;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #282c34; padding: 20px; border-radius: 10px; overflow-x: auto; border: 1px solid #3e4451; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 14px; line-height: 1.6; color: #abb2bf; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   dracula: {
@@ -227,6 +251,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0;
         border: 1px solid #44475a;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'Fira Code', Consolas, Monaco, monospace; 
@@ -242,10 +268,12 @@ export const codeBlockStyles = {
         color: #f8f8f2;
         font-size: 13px;
         line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #282a36; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #44475a;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #f8f8f2;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #282a36; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #44475a; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #f8f8f2; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   monokai: {
@@ -259,6 +287,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0;
         border: none;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'Monaco', 'Courier New', monospace; 
@@ -274,10 +304,12 @@ export const codeBlockStyles = {
         color: #f8f8f2;
         font-size: 13px;
         line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #272822; padding: 16px; border-radius: 6px; overflow-x: auto;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #f8f8f2;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #272822; padding: 16px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #f8f8f2; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   nord: {
@@ -291,6 +323,8 @@ export const codeBlockStyles = {
         overflow-x: auto; 
         margin: 15px 0;
         border: 1px solid #3b4252;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; 
@@ -306,10 +340,12 @@ export const codeBlockStyles = {
         color: #d8dee9;
         font-size: 13px;
         line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #2e3440; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #3b4252;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #d8dee9;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #2e3440; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #3b4252; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 13px; line-height: 1.5; color: #d8dee9; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 
   notion: {
@@ -324,6 +360,8 @@ export const codeBlockStyles = {
         margin: 15px 0;
         border: 1px solid rgba(55, 53, 47, 0.16);
         color: #37352f;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
       code { 
         font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono', monospace; 
@@ -339,10 +377,12 @@ export const codeBlockStyles = {
         color: #37352f;
         font-size: 14px;
         line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
       }
     `,
     highlightPre: (content, font) => 
-      `<pre class="hljs" style="background: #f7f6f3; padding: 16px; border-radius: 4px; overflow-x: auto; border: 1px solid rgba(55, 53, 47, 0.16); color: #37352f;"><code style="font-family: ${font}; font-size: 14px; line-height: 1.5; color: #37352f;">${content}</code></pre>`,
+      `<pre class="hljs" style="background: #f7f6f3; padding: 16px; border-radius: 4px; overflow-x: auto; border: 1px solid rgba(55, 53, 47, 0.16); color: #37352f; white-space: pre-wrap; word-wrap: break-word;"><code style="font-family: ${font}; font-size: 14px; line-height: 1.5; color: #37352f; white-space: pre-wrap; word-wrap: break-word;">${content}</code></pre>`,
   },
 }
 

@@ -97,11 +97,19 @@ export function useMarkdownRenderer() {
   md.use(markdownItSup)
 
   // 自定义列表渲染，手动添加列表符号（微信公众号不支持 list-style）
-  md.renderer.rules.bullet_list_open = () => {
-    return '<ul style="margin:0; padding:0 0 0 12px; list-style:none;">'
+  // 嵌套层级的无序列表符号
+  const bulletMarkers = ['•', '◦', '▪']
+
+  md.renderer.rules.bullet_list_open = (tokens, idx, options, env) => {
+    if (!env._bulletDepth) env._bulletDepth = 0
+    env._bulletDepth++
+    const isNested = env._bulletDepth > 1
+    const padding = isNested ? 12 : 6
+    return `<ul style="margin:0; padding:0 0 0 ${padding}px; list-style:none;">`
   }
 
-  md.renderer.rules.bullet_list_close = () => {
+  md.renderer.rules.bullet_list_close = (tokens, idx, options, env) => {
+    if (env._bulletDepth) env._bulletDepth--
     return '</ul>'
   }
 
@@ -109,11 +117,16 @@ export function useMarkdownRenderer() {
     const start = tokens[idx].attrGet('start') || 1
     if (!env._orderedCounters) env._orderedCounters = []
     env._orderedCounters.push(start)
-    return '<ol style="margin:0; padding:0 0 0 12px; list-style:none;">'
+    if (!env._orderedDepth) env._orderedDepth = 0
+    env._orderedDepth++
+    const isNested = env._orderedDepth > 1
+    const padding = isNested ? 12 : 6
+    return `<ol style="margin:0; padding:0 0 0 ${padding}px; list-style:none;">`
   }
 
   md.renderer.rules.ordered_list_close = (tokens, idx, options, env) => {
     if (env._orderedCounters) env._orderedCounters.pop()
+    if (env._orderedDepth) env._orderedDepth--
     return '</ol>'
   }
 
@@ -124,7 +137,9 @@ export function useMarkdownRenderer() {
       const num = env._orderedCounters[env._orderedCounters.length - 1]++
       return `<li style="margin:7px 8px; display:block;">${num}. `
     }
-    return '<li style="margin:7px 8px; display:block;">• '
+    const depth = (env._bulletDepth || 1) - 1
+    const marker = bulletMarkers[Math.min(depth, bulletMarkers.length - 1)]
+    return `<li style="margin:7px 8px; display:block;">${marker} `
   }
 
   md.renderer.rules.list_item_close = () => {
@@ -152,7 +167,7 @@ export function useMarkdownRenderer() {
     return defaultFence ? defaultFence(tokens, idx, options, env, self) : ''
   }
 
-  // highlight.js 颜色映射（基于 github-light 主题）
+  // highlight.js 颜色映射（基于 github-light 主题，适用于浅色背景）
   const hljsColors = {
     'comment': { color: '#6a737d', fontStyle: 'italic' },
     'quote': { color: '#6a737d', fontStyle: 'italic' },
@@ -192,12 +207,55 @@ export function useMarkdownRenderer() {
     'section': { color: '#22863a' }
   }
 
+  // highlight.js 颜色映射（适用于深色背景，基于 Dracula/One Dark 风格）
+  const hljsColorsDark = {
+    'comment': { color: '#6272a4', fontStyle: 'italic' },
+    'quote': { color: '#6272a4', fontStyle: 'italic' },
+    'keyword': { color: '#ff79c6' },
+    'selector-tag': { color: '#ff79c6' },
+    'subst': { color: '#f8f8f2' },
+    'number': { color: '#bd93f9' },
+    'literal': { color: '#bd93f9' },
+    'variable': { color: '#ffb86c' },
+    'template-variable': { color: '#ffb86c' },
+    'tag': { color: '#ff79c6' },
+    'name': { color: '#8be9fd' },
+    'selector-id': { color: '#bd93f9' },
+    'selector-class': { color: '#bd93f9' },
+    'regexp': { color: '#f1fa8c' },
+    'deletion': { color: '#ff5555', backgroundColor: '#44475a' },
+    'addition': { color: '#50fa7b', backgroundColor: '#2d4a2d' },
+    'built_in': { color: '#50fa7b' },
+    'builtin-name': { color: '#50fa7b' },
+    'type': { color: '#8be9fd' },
+    'class': { color: '#8be9fd' },
+    'function': { color: '#50fa7b' },
+    'params': { color: '#f8f8f2' },
+    'property': { color: '#66d9e8' },
+    'attribute': { color: '#ffb86c' },
+    'punctuation': { color: '#f8f8f2' },
+    'string': { color: '#f1fa8c' },
+    'symbol': { color: '#ffb86c' },
+    'bullet': { color: '#bd93f9' },
+    'link': { color: '#8be9fd', textDecoration: 'underline' },
+    'meta': { color: '#6272a4' },
+    'meta-keyword': { color: '#ff79c6' },
+    'meta-string': { color: '#f1fa8c' },
+    'emphasis': { fontStyle: 'italic' },
+    'strong': { fontWeight: 'bold' },
+    'title': { color: '#50fa7b' },
+    'section': { color: '#50fa7b' }
+  }
+
+  // 深色代码块主题集合
+  const darkCodeStyles = new Set(['macos', 'vscode', 'atom', 'oneDark', 'dracula', 'monokai', 'nord'])
+
   // 内联代码高亮样式
-  function inlineHighlightStyles(html) {
+  function inlineHighlightStyles(html, colorMap) {
     // 匹配带有 hljs class 的 span 标签
     return html.replace(/<span class="hljs-([a-z0-9-]+)"([^>]*)>/gi, (match, className, rest) => {
       const styles = []
-      const colorInfo = hljsColors[className]
+      const colorInfo = colorMap[className]
       if (colorInfo) {
         if (colorInfo.color) {
           styles.push(`color:${colorInfo.color}`)
@@ -237,8 +295,9 @@ export function useMarkdownRenderer() {
           content = md.utils.escapeHtml(str)
         }
 
-        // 内联高亮样式
-        content = inlineHighlightStyles(content)
+        // 内联高亮样式（深色主题用深色颜色映射，浅色主题用浅色颜色映射）
+        const colorMap = darkCodeStyles.has(codeBlockStyle) ? hljsColorsDark : hljsColors
+        content = inlineHighlightStyles(content, colorMap)
 
         // 使用配置中的代码块样式
         const styleConfig = codeBlockStyles[codeBlockStyle]
